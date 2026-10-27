@@ -9,28 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* Layout: soft clinical workbench — header band, week grid beside a slot-detail panel, sticky step bar */
+/* Layout: soft clinical workbench — header band with role switch, one page per tab, shift grid beside a slot panel */
 :root {
-  --bg: #e8eef1;
-  --surface: #eff4f6;
-  --raised: #f5f8fa;
-  --sh-hi: #ffffff;
-  --sh-lo: #c6d2d9;
-  --fg: #1c2a32;
-  --muted: #5d6f79;
-  --line: #d5dfe4;
-  --accent: #157b7a;
-  --accent-2: #1c9592;
-  --accent-fg: #ffffff;
-  --accent-soft: #d5ecea;
-  --col-on: #fdf3e2;
+  --bg: #e8eef1; --surface: #eff4f6; --raised: #f5f8fa; --sh-hi: #ffffff; --sh-lo: #c6d2d9;
+  --fg: #1c2a32; --muted: #5d6f79; --line: #d5dfe4;
+  --accent: #157b7a; --accent-2: #1c9592; --accent-fg: #ffffff; --accent-soft: #d5ecea; --col-on: #fdf3e2;
   --d-bg: #dbe8fb; --d-fg: #1d5aa6; --d-line: #b6cdf1;
   --l-bg: #d7f0e4; --l-fg: #17704a; --l-line: #a9dcc3;
   --n-bg: #e9e0f8; --n-fg: #6338ab; --n-line: #cdbcef;
+  --e-bg: #d6f0f6; --e-fg: #0e6a80; --e-line: #a6d9e6;
+  --x-bg: #fbe1ec; --x-fg: #a3325f; --x-line: #f0b6cd;
   --o-bg: #e1e7ea; --o-fg: #56656e; --o-line: #ccd6dc;
   --warn: #b8610d; --warn-bg: #fcefdc; --warn-line: #f0c58e;
-  --danger: #bf3434; --danger-bg: #fbe2e2;
-  --ok: #1d7a4b;
+  --danger: #bf3434; --danger-bg: #fbe2e2; --ok: #1d7a4b; --ok-bg: #dcf1e5;
   --font-ui: "Zen Kaku Gothic New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -41,9 +32,11 @@
     --d-bg: #1e3250; --d-fg: #a0c5f6; --d-line: #2e4a73;
     --l-bg: #183a2b; --l-fg: #88d6b0; --l-line: #24543f;
     --n-bg: #2e2445; --n-fg: #c7aaf5; --n-line: #45366a;
+    --e-bg: #173640; --e-fg: #8fd6e8; --e-line: #255563;
+    --x-bg: #3e2030; --x-fg: #f2a2c4; --x-line: #63304a;
     --o-bg: #26313a; --o-fg: #a4b2bb; --o-line: #34424c;
     --warn: #f0a650; --warn-bg: #392914; --warn-line: #6a4a1f;
-    --danger: #f27b7b; --danger-bg: #3c1f22; --ok: #6fd3a0;
+    --danger: #f27b7b; --danger-bg: #3c1f22; --ok: #6fd3a0; --ok-bg: #173527;
     color-scheme: dark;
   }
 }
@@ -54,9 +47,11 @@
   --d-bg: #1e3250; --d-fg: #a0c5f6; --d-line: #2e4a73;
   --l-bg: #183a2b; --l-fg: #88d6b0; --l-line: #24543f;
   --n-bg: #2e2445; --n-fg: #c7aaf5; --n-line: #45366a;
+  --e-bg: #173640; --e-fg: #8fd6e8; --e-line: #255563;
+  --x-bg: #3e2030; --x-fg: #f2a2c4; --x-line: #63304a;
   --o-bg: #26313a; --o-fg: #a4b2bb; --o-line: #34424c;
   --warn: #f0a650; --warn-bg: #392914; --warn-line: #6a4a1f;
-  --danger: #f27b7b; --danger-bg: #3c1f22; --ok: #6fd3a0;
+  --danger: #f27b7b; --danger-bg: #3c1f22; --ok: #6fd3a0; --ok-bg: #173527;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -73,16 +68,20 @@ button:disabled { cursor: not-allowed; }
 
 /* top bar */
 .topbar { background: var(--surface); box-shadow: 0 4px 14px var(--sh-lo); }
-.topbar-in { display: flex; align-items: center; gap: 24px; padding-block: 10px; flex-wrap: wrap; }
+.topbar-in { display: flex; align-items: center; gap: 12px 24px; padding-block: 10px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; letter-spacing: .02em; }
 .brand svg { width: 30px; height: 30px; }
 .nav { display: flex; gap: 6px; flex-wrap: wrap; }
-.nav button { border: 0; background: transparent; padding: 9px 18px; border-radius: 12px; font-weight: 500; color: var(--muted); }
-.nav button[aria-current="page"] { color: var(--accent); background: var(--surface); box-shadow: inset 3px 3px 7px var(--sh-lo), inset -3px -3px 7px var(--sh-hi); font-weight: 700; }
-.facility { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 500; }
+.nav a { text-decoration: none; padding: 9px 18px; border-radius: 12px; font-weight: 500; color: var(--muted); position: relative; }
+.nav a[aria-current="page"] { color: var(--accent); background: var(--surface); box-shadow: inset 3px 3px 7px var(--sh-lo), inset -3px -3px 7px var(--sh-hi); font-weight: 700; }
+.nav .cnt { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--warn); color: var(--accent-fg); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.who { margin-left: auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; color: var(--muted); font-weight: 500; }
+.who label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.who select { font: inherit; font-weight: 700; color: var(--fg); background: var(--surface); border: 0; padding: 7px 10px; border-radius: 10px; box-shadow: inset 2px 2px 5px var(--sh-lo), inset -2px -2px 5px var(--sh-hi); }
+.facility { display: flex; gap: 6px; align-items: center; }
 .facility svg { width: 18px; height: 18px; color: var(--accent); }
 
-/* title */
+/* page */
 main.wrap { padding-block: 22px 28px; }
 .titlebar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .titlebar h1 { margin: 0; font-size: 30px; letter-spacing: .04em; display: inline; }
@@ -90,21 +89,26 @@ main.wrap { padding-block: 22px 28px; }
 .proto { display: inline-block; margin-left: 10px; font-size: 11.5px; padding: 2px 8px; border-radius: 99px; border: 1px dashed var(--muted); color: var(--muted); vertical-align: 2px; letter-spacing: .04em; }
 .state-tag { font-weight: 700; color: var(--fg); }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent; background: var(--surface); padding: 11px 20px; border-radius: 14px; font-weight: 700; box-shadow: 5px 5px 12px var(--sh-lo), -5px -5px 12px var(--sh-hi); }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent; background: var(--surface); padding: 11px 20px; border-radius: 14px; font-weight: 700; box-shadow: 5px 5px 12px var(--sh-lo), -5px -5px 12px var(--sh-hi); text-decoration: none; }
 .btn:active { box-shadow: inset 3px 3px 7px var(--sh-lo), inset -3px -3px 7px var(--sh-hi); }
 .btn svg { width: 18px; height: 18px; flex: none; }
 .btn.primary { background: linear-gradient(145deg, var(--accent-2), var(--accent)); color: var(--accent-fg); }
-.btn.primary:disabled { opacity: .5; }
+.btn:disabled { opacity: .5; box-shadow: none; }
 .btn.sm { padding: 7px 12px; font-size: 13px; border-radius: 10px; }
 .btn.ghost { box-shadow: none; border-color: var(--line); background: transparent; }
+.btn.danger { box-shadow: none; border-color: var(--danger); color: var(--danger); background: transparent; }
 .link { border: 0; background: none; color: var(--accent); font-weight: 700; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 14px; background: var(--accent-soft); color: var(--fg); margin-bottom: 18px; font-size: 13.5px; }
+.banner.w { background: var(--warn-bg); }
+.banner b { color: var(--accent); }
+.banner.w b { color: var(--warn); }
 
-/* layout */
+/* shift layout */
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 22px; align-items: start; }
 @media (max-width: 1150px) { .layout { grid-template-columns: minmax(0, 1fr); } }
 .board { padding: 18px; min-width: 0; }
 .toolbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
-.seg { display: inline-flex; padding: 4px; border-radius: 14px; background: var(--surface); box-shadow: inset 3px 3px 7px var(--sh-lo), inset -3px -3px 7px var(--sh-hi); }
+.seg { display: inline-flex; flex-wrap: wrap; padding: 4px; border-radius: 14px; background: var(--surface); box-shadow: inset 3px 3px 7px var(--sh-lo), inset -3px -3px 7px var(--sh-hi); }
 .seg button { border: 0; background: transparent; padding: 8px 16px; border-radius: 11px; font-weight: 500; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
 .seg button svg { width: 16px; height: 16px; }
 .seg button[aria-pressed="true"] { background: linear-gradient(145deg, var(--accent-2), var(--accent)); color: var(--accent-fg); font-weight: 700; }
@@ -137,6 +141,7 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-var
 .cov-b.cur { outline: 2px solid var(--accent); outline-offset: 0; }
 .cov-b.none { opacity: .45; }
 .grid tbody th.nm { position: sticky; left: 0; z-index: 2; background: var(--raised); text-align: left; padding: 6px 10px 6px 12px; font-weight: 400; }
+.grid tbody tr.me th.nm, .grid tbody tr.me td { background: var(--accent-soft); }
 .nm-in { display: flex; gap: 9px; align-items: flex-start; }
 .nm-in b { display: block; font-size: 14.5px; white-space: nowrap; }
 .nm-in small { display: block; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
@@ -144,7 +149,8 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-var
 .dot.rn { background: var(--accent); }
 .dot.cw { background: var(--warn); }
 .cell { width: 100%; height: 48px; border: 0; background: transparent; display: grid; place-items: center; position: relative; border-radius: 0; padding: 0 3px; }
-.cell:hover { background: var(--accent-soft); }
+button.cell:hover { background: var(--accent-soft); }
+div.cell { cursor: default; }
 .cell.hl { box-shadow: inset 0 0 0 2px var(--warn); background: var(--warn-bg); }
 .cell.bad { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
 .cell.bad::after { content: "!"; position: absolute; left: 4px; top: 2px; font-size: 11px; font-weight: 700; color: var(--danger); }
@@ -153,6 +159,8 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-var
 .chip.d { background: var(--d-bg); color: var(--d-fg); border-color: var(--d-line); }
 .chip.l { background: var(--l-bg); color: var(--l-fg); border-color: var(--l-line); }
 .chip.n { background: var(--n-bg); color: var(--n-fg); border-color: var(--n-line); }
+.chip.e { background: var(--e-bg); color: var(--e-fg); border-color: var(--e-line); }
+.chip.x { background: var(--x-bg); color: var(--x-fg); border-color: var(--x-line); }
 .chip.off { background: var(--o-bg); color: var(--o-fg); border-color: var(--o-line); font-weight: 500; }
 .chip.req { background: transparent; color: var(--danger); border: 1px dashed var(--danger); font-weight: 500; }
 .ake { font-size: 12px; color: var(--n-fg); }
@@ -191,14 +199,13 @@ table.grid.compact .cov-b { justify-content: center; }
 .detail h4 small { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 6px; }
 .cands { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .cand { width: 100%; text-align: left; border: 0; background: var(--surface); border-radius: 13px; padding: 10px 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; box-shadow: 4px 4px 10px var(--sh-lo), -4px -4px 10px var(--sh-hi); }
-.cand:hover { outline: 1px solid var(--accent); }
+button.cand:hover { outline: 1px solid var(--accent); }
 .cand b { font-size: 14.5px; }
 .cand small { display: block; color: var(--muted); font-size: 12px; }
 .cand .st { font-size: 12.5px; color: var(--accent); font-weight: 700; }
 .cand .st.w { color: var(--warn); }
 .cand .go { font-size: 12px; color: var(--accent); font-weight: 700; white-space: nowrap; }
 .cand.no { box-shadow: none; border: 1px dashed var(--line); cursor: default; }
-.cand.no:hover { outline: 0; }
 .cand.no .st { color: var(--danger); }
 details.more { margin-top: 10px; }
 details.more summary { cursor: pointer; color: var(--muted); font-size: 13px; }
@@ -212,7 +219,7 @@ details.more .cands { margin-top: 8px; }
 .hint { color: var(--muted); font-size: 13px; }
 
 /* step bar */
-.stepbar { background: var(--surface); box-shadow: 0 -4px 14px var(--sh-lo); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.stepbar { background: var(--surface); box-shadow: 0 -4px 14px var(--sh-lo); padding-bottom: env(safe-area-inset-bottom, 0px); margin-top: 24px; }
 @media (min-width: 900px) { .stepbar { position: sticky; bottom: 0; z-index: 20; } }
 .stepbar-in { display: flex; align-items: center; gap: 18px; padding-block: 12px; flex-wrap: wrap; }
 .steps { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
@@ -226,13 +233,86 @@ details.more .cands { margin-top: 8px; }
 .steps .arr { color: var(--line); font-size: 18px; }
 .foot-act { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .foot-act .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-.foot-note { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.foot-note { font-size: 12px; color: var(--muted); }
 .foot-note.w { color: var(--warn); }
 .foot-note.ng { color: var(--danger); }
-@media (max-width: 700px) { .steps small { display: none; } .foot-act { margin-left: 0; align-items: stretch; width: 100%; } .foot-act .row { justify-content: stretch; } .foot-act .btn { flex: 1; justify-content: center; } }
+@media (max-width: 700px) { .steps small { display: none; } .foot-act { margin-left: 0; align-items: stretch; width: 100%; } .foot-act .btn { flex: 1; justify-content: center; } }
+
+/* other pages */
+.cols { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 1000px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.card { padding: 20px; min-width: 0; }
+.card + .card { margin-top: 22px; }
+.cols > .card { margin-top: 0; }
+.card h2 { margin: 0 0 4px; font-size: 19px; }
+.card h2 small { font-size: 12.5px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+.card > p.lead { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+.card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.f { display: grid; gap: 5px; min-width: 0; }
+.f > span { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.f input[type=text], .f input[type=email], .f input[type=number], .f input[type=date], .f input[type=time], .f select, .f textarea, .inl {
+  font: inherit; color: var(--fg); background: var(--raised); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; width: 100%; min-width: 0; }
+.inl { width: 72px; padding: 5px 8px; text-align: right; }
+.f textarea { resize: vertical; }
+.f .err { color: var(--danger); font-size: 12px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.form-row > .f { flex: 1 1 140px; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.radios { display: flex; gap: 8px; flex-wrap: wrap; }
+.radios label { display: flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); cursor: pointer; }
+.radios label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.radios input { accent-color: var(--accent); }
+.stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+.stat { padding: 8px 12px; border-radius: 12px; background: var(--raised); border: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.stat b { display: block; font-size: 17px; color: var(--fg); }
+.stat.w b { color: var(--warn); }
+.cal7 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
+.cal7 .wd { text-align: center; font-size: 11.5px; color: var(--muted); font-weight: 700; }
+.cal7 .wd.sun { color: var(--danger); } .cal7 .wd.sat { color: var(--d-fg); }
+.cday { aspect-ratio: 1 / .9; border: 1px solid var(--line); background: var(--raised); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; font-weight: 700; font-variant-numeric: tabular-nums; max-width: 100%; }
+.cday small { font-size: 9.5px; font-weight: 500; color: var(--muted); line-height: 1.1; }
+.cday.sel { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.cday.sel small { color: var(--accent-fg); }
+.cday.has-ap small { color: var(--ok); } .cday.has-pd small { color: var(--warn); }
+.cday:disabled { opacity: .35; }
+.cday.hol { color: var(--danger); }
+.dt-wrap { overflow-x: auto; }
+table.dt { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.dt th, .dt td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.dt th { font-size: 12px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.dt td.num, .dt th.num { text-align: right; }
+.dt tr.off-row td { color: var(--muted); }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.b-pending { background: var(--warn-bg); color: var(--warn); }
+.b-approved { background: var(--ok-bg); color: var(--ok); }
+.b-rejected { background: var(--danger-bg); color: var(--danger); }
+.b-withdrawn, .b-muted { background: var(--o-bg); color: var(--o-fg); }
+.b-forbid { background: var(--danger-bg); color: var(--danger); }
+.b-avoid { background: var(--warn-bg); color: var(--warn); }
+.req-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.req-item { padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--raised); display: grid; gap: 6px; }
+.req-item .top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.req-item .top b { font-size: 15px; }
+.req-item .meta { font-size: 12.5px; color: var(--muted); }
+.req-item .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.req-item .acts input { flex: 1 1 180px; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; min-width: 0; }
+.diff { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.impact { font-size: 12.5px; padding: 6px 10px; border-radius: 10px; background: var(--surface); }
+.impact.ng { color: var(--danger); background: var(--danger-bg); }
+.subnav { width: fit-content; max-width: 100%; margin-bottom: 18px; }
+.toc { display: flex; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 18px; font-size: 13px; }
+.toc a { color: var(--accent); font-weight: 700; }
+.empty { padding: 28px 16px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; }
+.mylist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mylist li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--raised); border: 1px solid var(--line); }
+.mylist li .t { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+.hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.hist li { display: grid; grid-template-columns: 9.5em 8.5em 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+@media (max-width: 600px) { .hist li { grid-template-columns: 1fr; gap: 0; } }
 
 /* popover / modal / toast */
-.pop { position: absolute; z-index: 50; width: 250px; padding: 12px; border-radius: 16px; background: var(--surface); box-shadow: 8px 8px 22px var(--sh-lo), -4px -4px 14px var(--sh-hi); border: 1px solid var(--line); }
+.pop { position: absolute; z-index: 50; width: 260px; padding: 12px; border-radius: 16px; background: var(--surface); box-shadow: 8px 8px 22px var(--sh-lo), -4px -4px 14px var(--sh-hi); border: 1px solid var(--line); }
 .pop-h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 13px; }
 .pop-opts { display: grid; gap: 4px; }
 .opt { display: flex; gap: 10px; align-items: center; border: 1px solid transparent; background: transparent; padding: 6px 8px; border-radius: 10px; text-align: left; }
@@ -277,71 +357,21 @@ details.more .cands { margin-top: 8px; }
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="11" y="2" width="10" height="10" rx="3" fill="var(--accent)"/><rect x="2" y="11" width="10" height="10" rx="3" fill="var(--accent-2)"/><rect x="20" y="11" width="10" height="10" rx="3" fill="var(--accent-2)"/><rect x="11" y="20" width="10" height="10" rx="3" fill="var(--accent)"/></svg>
       シフト管理
     </div>
-    <nav class="nav" aria-label="メイン">
-      <button aria-current="page">シフト</button>
-      <button data-act="nav">希望・申請</button>
-      <button data-act="nav">職員</button>
-      <button data-act="nav">設定</button>
-    </nav>
-    <div class="facility">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21h18M5 21V5h9v16M14 9h5v12M8 9h2M8 13h2M8 17h2"/></svg>
-      すみれの丘クリニック
+    <nav class="nav" aria-label="メイン" id="nav"></nav>
+    <div class="who">
+      <label for="role-sel">表示する立場
+        <select id="role-sel">
+          <option value="admin">システム管理者</option>
+          <option value="maker">シフト作成者</option>
+          <option value="staff">一般職員（田中 美咲）</option>
+        </select>
+      </label>
+      <span class="facility"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21h18M5 21V5h9v16M14 9h5v12M8 9h2M8 13h2M8 17h2"/></svg>すみれの丘クリニック</span>
     </div>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="titlebar">
-    <div>
-      <h1>配置を整える</h1>
-      <p class="sub">2026年11月・<span class="state-tag" id="status-label">下書き</span><span class="proto">試作・サンプルデータ</span></p>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="btn-regen" data-act="regen">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 2l1.8 5.2L17 9l-5.2 1.8L10 16l-1.8-5.2L3 9l5.2-1.8zM18 13l.9 2.6 2.6.9-2.6.9L18 20l-.9-2.6-2.6-.9 2.6-.9z"/></svg>
-        固定を保持して再作成
-      </button>
-      <button class="btn" data-act="csv">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
-        CSV出力
-      </button>
-    </div>
-  </div>
-
-  <div class="layout">
-    <section class="board neu" aria-label="シフト表">
-      <div class="toolbar">
-        <div class="seg" role="group" aria-label="表示切替">
-          <button data-act="view" data-v="month" id="v-month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>月間シフト</button>
-          <button data-act="view" data-v="week" id="v-week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h8"/></svg>週表示</button>
-        </div>
-        <div class="mnav">
-          <button class="iconbtn" data-act="prev" id="b-prev" aria-label="前の週"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <strong>2026年11月</strong>
-          <button class="iconbtn" data-act="next" id="b-next" aria-label="次の週"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-        </div>
-        <span class="range tn" id="range"></span>
-      </div>
-      <div class="grid-wrap" id="grid"></div>
-      <div class="legend" id="legend"></div>
-    </section>
-    <aside class="side neu" id="side" aria-label="配置の詳細"></aside>
-  </div>
-</main>
-
-<footer class="stepbar">
-  <div class="wrap stepbar-in">
-    <ol class="steps" id="steps"></ol>
-    <div class="foot-act">
-      <div class="row">
-        <button class="btn ghost sm" data-act="reset">サンプルに戻す</button>
-        <button class="btn" data-act="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>保存</button>
-        <button class="btn primary" id="btn-main" data-act="main"></button>
-      </div>
-      <div class="foot-note" id="foot-note"></div>
-    </div>
-  </div>
-</footer>
+<main id="view"></main>
 
 <div id="pop" class="pop" role="dialog" aria-label="勤務を変更" hidden></div>
 <div id="modal" class="modal-back" hidden><div class="modal neu" role="dialog" aria-modal="true" aria-labelledby="modal-title" id="modal-body"></div></div>
@@ -350,349 +380,645 @@ details.more .cands { margin-top: 8px; }
 <script>
 (() => {
 const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
-/* ---------- マスター（サンプル） ---------- */
+/* ---------- 定数 ---------- */
 const DAYS = 30;                               // 2026年11月。11/1は日曜
 const DOW = ['日', '月', '火', '水', '木', '金', '土'];
 const dowOf = d => (d - 1) % 7;
-const HOL = { 3: '文化の日', 23: '勤労感謝の日' };
-const isRest = d => dowOf(d) === 0 || dowOf(d) === 6 || !!HOL[d];
 const fmtD = d => `11/${d}(${DOW[dowOf(d)]})`;
 const WEEKS = [[1, 7], [8, 14], [15, 21], [22, 28], [29, 30]];
 const weekIdx = d => Math.floor((d - 1) / 7);
 const weekLabel = w => `11/${WEEKS[w][0]}〜11/${WEEKS[w][1]}の週`;
-const SH = {
-  D: { name: '日勤', short: '日', start: 510, end: 1050, brk: 60, cls: 'd', time: '8:30–17:30' },
-  L: { name: '遅番', short: '遅', start: 660, end: 1200, brk: 60, cls: 'l', time: '11:00–20:00' },
-  N: { name: '夜勤', short: '夜', start: 990, end: 1440 + 570, brk: 120, cls: 'n', time: '16:30–翌9:30' },
-};
-const KS = ['D', 'L', 'N'];
-const isWork = v => v === 'D' || v === 'L' || v === 'N';
-const wm = k => SH[k].end - SH[k].start - SH[k].brk;
-const GAP_MIN = 660;                           // 勤務間隔の警告基準（11時間・仮）
-const RUN_MAX = 5;                             // 連続勤務の警告基準（仮）
-const ROLES = ['看護師', '介護士'];
-const BASE = {
-  weekday: { D: { 看護師: 2, 介護士: 1 }, L: { 看護師: 1, 介護士: 1 }, N: { 看護師: 1, 介護士: 1 } },
-  rest: { D: { 看護師: 1, 介護士: 1 }, L: { 看護師: 0, 介護士: 0 }, N: { 看護師: 1, 介護士: 1 } },
-};
-const EXC = { '10|N|看護師': 2, '12|L|介護士': 2, '20|D|看護師': 3 };
-const EXC_NOTE = { 10: '日付例外：夜勤の看護師を2名に増員', 12: '日付例外：遅番の介護士を2名に増員', 20: '健診日：日勤の看護師を3名に増員' };
-const req = (d, k, r) => { const e = EXC[`${d}|${k}|${r}`]; return e != null ? e : BASE[isRest(d) ? 'rest' : 'weekday'][k][r]; };
-
-const F = 9600; // 月160時間
-const STAFF = [
-  { id: 's1', name: '田中 美咲', role: '看護師', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 6 },
-  { id: 's2', name: '佐藤 直樹', role: '看護師', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 6 },
-  { id: 's3', name: '鈴木 さくら', role: '看護師', emp: 'パート', weekMax: 1800, nMin: 0, nWish: 0, nMax: 0 },
-  { id: 's4', name: '高橋 翔太', role: '看護師', emp: '正職員', target: F, nMin: 4, nWish: 6, nMax: 7 },
-  { id: 's5', name: '小林 由美', role: '看護師', emp: '正職員', target: F, nMin: 3, nWish: 4, nMax: 5 },
-  { id: 's6', name: '加藤 恵', role: '看護師', emp: 'パート', weekMax: 1800, nMin: 0, nWish: 1, nMax: 2 },
-  { id: 's7', name: '井上 真由', role: '看護師', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 6 },
-  { id: 's8', name: '伊藤 葵', role: '介護士', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 7 },
-  { id: 's9', name: '渡辺 大輔', role: '介護士', emp: '正職員', target: F, nMin: 4, nWish: 6, nMax: 7 },
-  { id: 's10', name: '中村 玲奈', role: '介護士', emp: 'パート', weekMax: 1800, nMin: 0, nWish: 0, nMax: 0 },
-  { id: 's11', name: '山本 健', role: '介護士', emp: 'パート', weekMax: 1800, nMin: 0, nWish: 1, nMax: 2 },
-  { id: 's12', name: '吉田 誠', role: '介護士', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 7 },
-  { id: 's13', name: '松本 彩', role: '介護士', emp: '正職員', target: F, nMin: 4, nWish: 5, nMax: 7 },
-];
-STAFF.forEach(s => { if (s.weekMax) s.target = Math.round(s.weekMax * DAYS / 7); });
-const byId = Object.fromEntries(STAFF.map(s => [s.id, s]));
-const OFF = { s1: [14, 15], s2: [3], s3: [11, 24], s4: [7, 21], s5: [1, 2], s6: [18], s7: [26], s8: [9, 16], s9: [22], s10: [13, 27], s11: [5, 6], s12: [29], s13: [8, 25] };
-const PAIRS = [{ a: 's4', b: 's9', type: '禁止' }, { a: 's8', b: 's10', type: '回避' }];
+const JOBS = ['看護師', '介護士'];
+const COLORS = { d: '青', l: '緑', n: '紫', e: '水色', x: '桃' };
+const ROLE_NAMES = { admin: 'システム管理者', maker: 'シフト作成者', staff: '一般職員' };
+const REQ_TYPES = { off: '希望休', wish: '勤務希望', avail: '勤務可能時間' };
+const ST_NAMES = { pending: '申請中', approved: '承認済み', rejected: '却下', withdrawn: '取下げ' };
+const STORE = 'sumire-shift-2026-11-v2';
+const range = ([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const hm = m => `${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + '分' : ''}`;
 const hrs = m => `${(m / 60).toFixed(m % 60 ? 1 : 0)}h`;
+const toHM = m => { const x = ((m % 1440) + 1440) % 1440; return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`; };
+const parseHM = s => { const [h, m] = String(s).split(':').map(Number); return h * 60 + (m || 0); };
+const nowStr = () => { const t = new Date(); return `${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`; };
 
-/* ---------- 状態 ---------- */
-const STORE = 'sumire-shift-2026-11-v1';
-let state;
-function blankAsg() { const o = {}; STAFF.forEach(s => { o[s.id] = Array(DAYS + 2).fill(''); }); return o; }
-function initialState() {
-  const st = { asg: blankAsg(), lock: { 's2|10': true }, seed: 7, status: 'draft', version: 0, published: 0, reasons: {}, notify: { mail: true, line: false, app: true }, view: 'week', week: 1, sel: null, showAll: false };
-  st.asg.s2[10] = 'N';
-  return st;
+/* ---------- サンプルデータ ---------- */
+function seedDb() {
+  const S = (id, name, job, emp, o) => ({ id, name, job, emp, contract: emp === '正職員' ? 'month' : 'week', monthMin: 9600, weekMin: 1800, nMin: 0, nWish: 0, nMax: 0, offCap: emp === '正職員' ? 8 : 6, email: `staff${id.slice(1).padStart(2, '0')}@sumire-clinic.example`, active: true, ...o });
+  const staff = [
+    S('s1', '田中 美咲', '看護師', '正職員', { nMin: 4, nWish: 5, nMax: 6 }),
+    S('s2', '佐藤 直樹', '看護師', '正職員', { nMin: 4, nWish: 5, nMax: 6 }),
+    S('s3', '鈴木 さくら', '看護師', 'パート'),
+    S('s4', '高橋 翔太', '看護師', '正職員', { nMin: 4, nWish: 6, nMax: 7 }),
+    S('s5', '小林 由美', '看護師', '正職員', { nMin: 3, nWish: 4, nMax: 5 }),
+    S('s6', '加藤 恵', '看護師', 'パート', { nWish: 1, nMax: 2 }),
+    S('s7', '井上 真由', '看護師', '正職員', { nMin: 4, nWish: 5, nMax: 6 }),
+    S('s8', '伊藤 葵', '介護士', '正職員', { nMin: 4, nWish: 5, nMax: 7 }),
+    S('s9', '渡辺 大輔', '介護士', '正職員', { nMin: 4, nWish: 6, nMax: 7 }),
+    S('s10', '中村 玲奈', '介護士', 'パート'),
+    S('s11', '山本 健', '介護士', 'パート', { nWish: 1, nMax: 2 }),
+    S('s12', '吉田 誠', '介護士', '正職員', { nMin: 4, nWish: 5, nMax: 7 }),
+    S('s13', '松本 彩', '介護士', '正職員', { nMin: 4, nWish: 5, nMax: 7 }),
+  ];
+  const OFF = { s1: [14, 15], s2: [3], s3: [11, 24], s4: [7, 21], s5: [1, 2], s6: [18], s7: [26], s8: [9, 16], s9: [22], s10: [13, 27], s11: [5, 6], s12: [29], s13: [8, 25] };
+  let n = 1; const requests = [];
+  Object.entries(OFF).forEach(([sid, ds]) => ds.forEach(d => requests.push({ id: 'r' + n++, sid, d, type: 'off', comment: '', status: 'approved', at: '10/12 09:10', by: 'システム管理者', note: '' })));
+  requests.push({ id: 'r' + n++, sid: 's1', d: 20, type: 'off', comment: '子どもの学校行事のため', status: 'pending', at: '10/24 21:05' });
+  requests.push({ id: 'r' + n++, sid: 's9', d: 27, type: 'off', comment: '通院', status: 'pending', at: '10/25 18:40' });
+  requests.push({ id: 'r' + n++, sid: 's3', d: 4, type: 'avail', from: '09:00', to: '16:00', comment: '保育園の送迎', status: 'approved', at: '10/10 12:00' });
+  requests.push({ id: 'r' + n++, sid: 's6', d: 12, type: 'wish', k: 'D', comment: '', status: 'approved', at: '10/11 08:30' });
+  requests.push({ id: 'r' + n++, sid: 's12', d: 30, type: 'off', comment: '', status: 'rejected', at: '10/15 10:00', by: 'システム管理者', note: '月末は夜勤者が不足するため' });
+  return {
+    patterns: [
+      { key: 'D', name: '日勤', short: '日', start: 510, end: 1050, brk: 60, color: 'd' },
+      { key: 'L', name: '遅番', short: '遅', start: 660, end: 1200, brk: 60, color: 'l' },
+      { key: 'N', name: '夜勤', short: '夜', start: 990, end: 2010, brk: 120, color: 'n' },
+    ],
+    staff,
+    pairs: [{ id: 'p1', a: 's4', b: 's9', type: '禁止', note: '業務上の申し送りトラブル' }, { id: 'p2', a: 's8', b: 's10', type: '回避', note: '新人同士' }],
+    base: {
+      weekday: { D: { 看護師: 2, 介護士: 1 }, L: { 看護師: 1, 介護士: 1 }, N: { 看護師: 1, 介護士: 1 } },
+      rest: { D: { 看護師: 1, 介護士: 1 }, L: { 看護師: 0, 介護士: 0 }, N: { 看護師: 1, 介護士: 1 } },
+    },
+    exceptions: [
+      { id: 'x1', d: 10, k: 'N', job: '看護師', count: 2, note: '重症の方の受け入れ' },
+      { id: 'x2', d: 12, k: 'L', job: '介護士', count: 2, note: '入浴介助の増便' },
+      { id: 'x3', d: 20, k: 'D', job: '看護師', count: 3, note: '健診日' },
+    ],
+    calendar: [{ id: 'c1', d: 3, kind: '祝日', name: '文化の日' }, { id: 'c2', d: 23, kind: '祝日', name: '勤労感謝の日' }],
+    deadline: '2026-10-31', gapMin: 660, runMax: 5,
+    requests, changes: [],
+    asg: {}, lock: { 's2|10': true }, seed: 7, status: 'draft', version: 0, published: 0, pubAsg: null,
+    reasons: {}, notify: { mail: true, line: false, app: true }, history: [], nextId: 200,
+  };
 }
 
+let db, ui = { route: 'shift', role: 'admin', me: 's1', view: 'week', week: 1, sel: null, showAll: false, reqTab: 'wish', reqStaff: 's1', reqType: 'off', picked: [], reqFilter: 'all', issues: [] };
+const nid = p => p + (db.nextId++);
+const PAT = () => db.patterns;
+const pk = k => db.patterns.find(p => p.key === k);
+const isWork = v => !!v && v !== 'O' && !!pk(v);
+const wm = k => { const p = pk(k); return p.end - p.start - p.brk; };
+const crosses = k => pk(k).end > 1440;
+const gapBetween = (a, b) => 1440 + pk(b).start - pk(a).end;   // a の翌日に b
+const SID = id => db.staff.find(s => s.id === id);
+const active = () => db.staff.filter(s => s.active);
+const target = s => s.contract === 'week' ? Math.round(s.weekMin * DAYS / 7) : s.monthMin;
+const calOf = d => db.calendar.find(c => c.d === d);
+const isRest = d => { const c = calOf(d); if (c && c.kind === '特別営業日') return false; if (c) return true; return dowOf(d) === 0 || dowOf(d) === 6; };
+const isRedDay = d => dowOf(d) === 0 || (calOf(d) && calOf(d).kind !== '特別営業日');
+const req = (d, k, j) => { const e = db.exceptions.find(x => x.d === d && x.k === k && x.job === j); if (e) return e.count; const b = db.base[isRest(d) ? 'rest' : 'weekday'][k]; return b ? (b[j] || 0) : 0; };
+const exNote = d => db.exceptions.filter(x => x.d === d).map(x => `${pk(x.k) ? pk(x.k).name : ''}・${x.job}を${x.count}名に（${x.note || '日付例外'}）`).join('、');
+const offSet = sid => new Set(db.requests.filter(r => r.sid === sid && r.type === 'off' && r.status === 'approved').map(r => r.d));
+const availOf = (sid, d) => db.requests.find(r => r.sid === sid && r.d === d && r.type === 'avail' && r.status === 'approved');
+const wishOf = (sid, d) => db.requests.find(r => r.sid === sid && r.d === d && r.type === 'wish' && r.status === 'approved');
+const fits = (k, av) => { let f = parseHM(av.from), t = parseHM(av.to); if (t <= f) t += 1440; const p = pk(k); return p.start >= f && p.end <= t; };
+const order = () => [...PAT()].sort((a, b) => (b.end > 1440) - (a.end > 1440) || a.start - b.start).map(p => p.key);
+const can = what => ({ edit: ui.role !== 'staff', decide: ui.role === 'admin', master: ui.role === 'admin' })[what];
+function log(text) { db.history.unshift({ at: nowStr(), who: ui.role === 'staff' ? `一般職員（${SID(ui.me).name}）` : ROLE_NAMES[ui.role], text }); db.history.length = Math.min(db.history.length, 200); }
+function ensureAsg() { db.staff.forEach(s => { if (!db.asg[s.id]) db.asg[s.id] = Array(DAYS + 2).fill(''); }); }
+function blankAsg() { const o = {}; db.staff.forEach(s => { o[s.id] = Array(DAYS + 2).fill(''); }); return o; }
+
 /* ---------- 計算 ---------- */
+let OFFM = {};
+function refreshOff() { OFFM = {}; db.staff.forEach(s => { OFFM[s.id] = offSet(s.id); }); }
 function staffStats(a) {
   let min = 0, n = 0; const wk = [0, 0, 0, 0, 0];
-  for (let d = 1; d <= DAYS; d++) { const v = a[d]; if (isWork(v)) { min += wm(v); wk[weekIdx(d)] += wm(v); if (v === 'N') n++; } }
+  for (let d = 1; d <= DAYS; d++) { const v = a[d]; if (isWork(v)) { min += wm(v); wk[weekIdx(d)] += wm(v); if (crosses(v)) n++; } }
   return { min, n, wk };
 }
 function runLen(a, d) { let c = 1; for (let i = d - 1; i >= 1 && isWork(a[i]); i--) c++; for (let i = d + 1; i <= DAYS && isWork(a[i]); i++) c++; return c; }
-const countOn = (asg, d, k, r) => STAFF.filter(s => s.role === r && asg[s.id][d] === k).length;
-const partners = (asg, s, d, k, type) => PAIRS.filter(p => p.type === type && (p.a === s.id || p.b === s.id)).map(p => p.a === s.id ? p.b : p.a).filter(o => asg[o][d] === k);
+const countOn = (asg, d, k, j) => active().filter(s => s.job === j && asg[s.id][d] === k).length;
+const partners = (asg, s, d, k, type) => db.pairs.filter(p => p.type === type && (p.a === s.id || p.b === s.id)).map(p => p.a === s.id ? p.b : p.a).filter(o => SID(o) && SID(o).active && asg[o] && asg[o][d] === k);
 
-// 配置できない理由（重大違反になるもの）。forGen では自動作成用の上限も見る
 function blockReason(asg, s, d, k, forGen) {
-  const a = asg[s.id];
-  if (OFF[s.id] && OFF[s.id].includes(d)) return '希望休（承認済み）';
-  if (d > 1 && a[d - 1] === 'N' && k === 'D') return '夜勤明けで勤務時間が重なる';
-  if (k === 'N' && a[d + 1] === 'D') return '翌日の日勤と勤務時間が重なる';
+  const a = asg[s.id], prev = a[d - 1], next = a[d + 1];
+  if (OFFM[s.id] && OFFM[s.id].has(d)) return '希望休（承認済み）';
+  if (d > 1 && isWork(prev) && gapBetween(prev, k) < 0) return '前日の勤務と時間が重なる';
+  if (isWork(next) && gapBetween(k, next) < 0) return '翌日の勤務と時間が重なる';
   if (partners(asg, s, d, k, '禁止').length) return '相性「禁止」の職員が同じ勤務';
   if (forGen) {
-    if (d > 1 && a[d - 1] === 'N') return '夜勤明け';
-    if (k === 'N' && isWork(a[d + 1])) return '翌日に勤務';
+    const av = availOf(s.id, d); if (av && !fits(k, av)) return '勤務可能時間外';
+    if (d > 1 && isWork(prev) && (crosses(prev) || gapBetween(prev, k) < db.gapMin)) return '間隔';
+    if (isWork(next) && (crosses(k) || gapBetween(k, next) < db.gapMin)) return '間隔';
     const st = staffStats(a);
-    if (k === 'N' && st.n >= s.nMax) return '夜勤上限';
-    if (s.weekMax) { if (st.wk[weekIdx(d)] + wm(k) > s.weekMax) return '週契約'; }
-    else if (st.min + wm(k) > s.target) return '月間時間';
+    if (crosses(k) && st.n >= s.nMax) return '夜勤上限';
+    if (s.contract === 'week') { if (st.wk[weekIdx(d)] + wm(k) > s.weekMin) return '週契約'; }
+    else if (st.min + wm(k) > s.monthMin) return '月間時間';
     const t = a[d]; a[d] = k; const rl = runLen(a, d); a[d] = t;
-    if (rl > RUN_MAX) return '連続勤務';
+    if (rl > db.runMax) return '連続勤務';
   }
   return '';
 }
 
 function generate(seed) {
+  refreshOff();
   const rng = mulberry32(seed * 9973 + 17);
   const asg = blankAsg();
-  STAFF.forEach(s => { for (let d = 1; d <= DAYS; d++) if (state.lock[s.id + '|' + d]) asg[s.id][d] = state.asg[s.id][d]; });
-  for (let d = 1; d <= DAYS; d++) for (const k of ['N', 'D', 'L']) for (const r of ROLES) {
-    let need = req(d, k, r) - countOn(asg, d, k, r);
+  db.staff.forEach(s => { for (let d = 1; d <= DAYS; d++) if (db.lock[s.id + '|' + d]) asg[s.id][d] = db.asg[s.id] ? db.asg[s.id][d] : ''; });
+  const staff = active();
+  for (let d = 1; d <= DAYS; d++) for (const k of order()) for (const j of JOBS) {
+    let need = req(d, k, j) - countOn(asg, d, k, j);
     while (need > 0) {
-      const c = STAFF.filter(s => s.role === r && asg[s.id][d] === '' && !state.lock[s.id + '|' + d] && !blockReason(asg, s, d, k, true));
+      const c = staff.filter(s => s.job === j && asg[s.id][d] === '' && !db.lock[s.id + '|' + d] && !blockReason(asg, s, d, k, true));
       if (!c.length) break;
       const scored = c.map(s => {
         const st = staffStats(asg[s.id]);
-        let v = st.min / s.target;
-        if (k === 'N') v += st.n < s.nMin ? -0.35 : (st.n >= s.nWish ? 0.25 : 0);
+        let v = st.min / target(s);
+        if (crosses(k)) v += st.n < s.nMin ? -0.35 : (st.n >= s.nWish ? 0.25 : 0);
+        const w = wishOf(s.id, d); if (w) v += w.k === k ? -0.5 : 0.3;
         if (partners(asg, s, d, k, '回避').length) v += 0.6;
-        if (s.weekMax) v += 0.05;
+        if (s.contract === 'week') v += 0.05;
         return [v + rng() * 0.12, s];
       }).sort((x, y) => x[0] - y[0]);
       asg[scored[0][1].id][d] = k; need--;
     }
   }
-  STAFF.forEach(s => { if (s.weekMax) return; const a = asg[s.id]; for (let d = 1; d <= DAYS; d++) if (a[d] === '' && !state.lock[s.id + '|' + d] && !(d > 1 && a[d - 1] === 'N')) a[d] = 'O'; });
+  staff.forEach(s => { if (s.contract === 'week') return; const a = asg[s.id]; for (let d = 1; d <= DAYS; d++) if (a[d] === '' && !db.lock[s.id + '|' + d] && !(d > 1 && isWork(a[d - 1]) && crosses(a[d - 1]))) a[d] = 'O'; });
   return asg;
 }
 
 function validate(asg) {
+  refreshOff();
   const out = [];
-  for (let d = 1; d <= DAYS; d++) for (const k of KS) for (const r of ROLES) {
-    const need = req(d, k, r); if (!need) continue;
-    const have = countOn(asg, d, k, r);
-    if (have < need) out.push({ key: `short|${d}|${k}|${r}`, sev: 'reason', cat: '配置不足', d, k, r, need, have, text: `${fmtD(d)} ${SH[k].name}・${r}　必要${need}名 / 配置${have}名` });
+  for (let d = 1; d <= DAYS; d++) for (const k of order()) for (const j of JOBS) {
+    const need = req(d, k, j); if (!need) continue;
+    const have = countOn(asg, d, k, j);
+    if (have < need) out.push({ key: `short|${d}|${k}|${j}`, sev: 'reason', cat: '配置不足', d, k, j, need, have, text: `${fmtD(d)} ${pk(k).name}・${j}　必要${need}名 / 配置${have}名` });
   }
-  for (const s of STAFF) {
+  for (const s of active()) {
     const a = asg[s.id], st = staffStats(a);
     for (let d = 1; d <= DAYS; d++) {
-      const v = a[d];
-      if (isWork(v) && OFF[s.id] && OFF[s.id].includes(d)) out.push({ key: `off|${s.id}|${d}`, sev: 'severe', cat: '承認済み希望休に勤務', sid: s.id, d, text: `${s.name}　${fmtD(d)} は承認済みの希望休ですが${SH[v].name}が入っています` });
-      if (d > 1 && a[d - 1] === 'N' && v === 'D') out.push({ key: `ovl|${s.id}|${d}`, sev: 'severe', cat: '勤務時間の重複', sid: s.id, d, text: `${s.name}　${fmtD(d - 1)}の夜勤（〜9:30）と${fmtD(d)}の日勤（8:30〜）が重なっています` });
-      if (d > 1 && a[d - 1] === 'N' && (v === 'L' || v === 'N')) {
-        const gap = SH[v].start - (SH.N.end - 1440);
-        if (gap < GAP_MIN) out.push({ key: `gap|${s.id}|${d}`, sev: 'reason', cat: '勤務間隔不足', sid: s.id, d, text: `${s.name}　${fmtD(d)} 夜勤明けから${SH[v].name}まで${hm(gap)}（基準11時間・仮）` });
+      const v = a[d]; if (!isWork(v)) continue;
+      if (OFFM[s.id].has(d)) out.push({ key: `off|${s.id}|${d}`, sev: 'severe', cat: '承認済み希望休に勤務', sid: s.id, d, text: `${s.name}　${fmtD(d)} は承認済みの希望休ですが${pk(v).name}が入っています` });
+      const av = availOf(s.id, d);
+      if (av && !fits(v, av)) out.push({ key: `av|${s.id}|${d}`, sev: 'reason', cat: '勤務可能時間外', sid: s.id, d, text: `${s.name}　${fmtD(d)} ${pk(v).name}は勤務可能時間（${av.from}〜${av.to}）の外です` });
+      const p = a[d - 1];
+      if (d > 1 && isWork(p)) {
+        const gap = gapBetween(p, v);
+        if (gap < 0) out.push({ key: `ovl|${s.id}|${d}`, sev: 'severe', cat: '勤務時間の重複', sid: s.id, d, text: `${s.name}　${fmtD(d - 1)}の${pk(p).name}（〜${toHM(pk(p).end)}）と${fmtD(d)}の${pk(v).name}（${toHM(pk(v).start)}〜）が重なっています` });
+        else if (gap < db.gapMin) out.push({ key: `gap|${s.id}|${d}`, sev: 'reason', cat: '勤務間隔不足', sid: s.id, d, text: `${s.name}　${fmtD(d - 1)}の${pk(p).name}から${fmtD(d)}の${pk(v).name}まで${hm(gap)}（基準${hm(db.gapMin)}・仮）` });
       }
+      const w = wishOf(s.id, d);
+      if (w && w.k !== v) out.push({ key: `wish|${s.id}|${d}`, sev: 'info', cat: '勤務希望の未達', sid: s.id, d, text: `${s.name}　${fmtD(d)} ${pk(w.k) ? pk(w.k).name : ''}を希望` });
     }
     let run = 0;
     for (let d = 1; d <= DAYS + 1; d++) {
       if (d <= DAYS && isWork(a[d])) { run++; continue; }
-      if (run > RUN_MAX) out.push({ key: `run|${s.id}|${d - run}`, sev: 'reason', cat: '連続勤務', sid: s.id, d: d - run, text: `${s.name}　${fmtD(d - run)}〜${fmtD(d - 1)} ${run}日連続（基準${RUN_MAX}日・仮）` });
+      if (run > db.runMax) out.push({ key: `run|${s.id}|${d - run}`, sev: 'reason', cat: '連続勤務', sid: s.id, d: d - run, text: `${s.name}　${fmtD(d - run)}〜${fmtD(d - 1)} ${run}日連続（基準${db.runMax}日・仮）` });
       run = 0;
     }
-    if (s.weekMax) st.wk.forEach((m, w) => { if (m > s.weekMax) out.push({ key: `wk|${s.id}|${w}`, sev: 'reason', cat: '週契約時間の超過', sid: s.id, d: WEEKS[w][0], text: `${s.name}　${weekLabel(w)} ${hm(m)}（週契約${hm(s.weekMax)}）` }); });
-    else if (st.min > s.target) out.push({ key: `mon|${s.id}`, sev: 'reason', cat: '月間時間の超過', sid: s.id, text: `${s.name}　月間${hm(st.min)}（規定${hm(s.target)}）` });
+    if (s.contract === 'week') st.wk.forEach((m, w) => { if (m > s.weekMin) out.push({ key: `wk|${s.id}|${w}`, sev: 'reason', cat: '週契約時間の超過', sid: s.id, d: WEEKS[w][0], text: `${s.name}　${weekLabel(w)} ${hm(m)}（週契約${hm(s.weekMin)}）` }); });
+    else if (st.min > s.monthMin) out.push({ key: `mon|${s.id}`, sev: 'reason', cat: '月間時間の超過', sid: s.id, text: `${s.name}　月間${hm(st.min)}（規定${hm(s.monthMin)}）` });
     if (st.n > s.nMax) out.push({ key: `nmax|${s.id}`, sev: 'reason', cat: '夜勤上限の超過', sid: s.id, text: `${s.name}　夜勤${st.n}回（上限${s.nMax}回）` });
     else if (st.n < s.nMin) out.push({ key: `nmin|${s.id}`, sev: 'reason', cat: '夜勤最低回数の未達', sid: s.id, text: `${s.name}　夜勤${st.n}回（最低${s.nMin}回）` });
     else if (st.n < s.nWish) out.push({ key: `nwish|${s.id}`, sev: 'info', cat: '夜勤希望回数の未達', sid: s.id, text: `${s.name}　夜勤${st.n}回（希望${s.nWish}回）` });
   }
-  for (const p of PAIRS) for (let d = 1; d <= DAYS; d++) {
-    const v = asg[p.a][d];
-    if (isWork(v) && asg[p.b][d] === v) out.push({ key: `pair|${p.a}|${p.b}|${d}`, sev: p.type === '禁止' ? 'severe' : 'info', cat: `相性「${p.type}」の同時配置`, sid: p.a, sid2: p.b, d, text: `${byId[p.a].name}・${byId[p.b].name}　${fmtD(d)} ${SH[v].name}` });
+  for (const p of db.pairs) {
+    const A = SID(p.a), B = SID(p.b); if (!A || !B || !A.active || !B.active) continue;
+    for (let d = 1; d <= DAYS; d++) {
+      const v = asg[p.a][d];
+      if (isWork(v) && asg[p.b][d] === v) out.push({ key: `pair|${p.a}|${p.b}|${d}`, sev: p.type === '禁止' ? 'severe' : 'info', cat: `相性「${p.type}」の同時配置`, sid: p.a, sid2: p.b, d, text: `${A.name}・${B.name}　${fmtD(d)} ${pk(v).name}` });
+    }
   }
   return out;
 }
 
 function evalCand(s, d, k) {
-  const a = state.asg[s.id], cur = a[d];
-  const block = blockReason(state.asg, s, d, k, false);
+  const a = db.asg[s.id], cur = a[d];
+  const block = blockReason(db.asg, s, d, k, false);
   if (block) return { ok: false, why: block };
-  const notes = [];
-  const sim = a.slice(); sim[d] = k;
+  const notes = [], sim = a.slice(); sim[d] = k;
   const st = staffStats(sim);
-  if (isWork(cur)) notes.push(`当日の${SH[cur].name}から移動`);
-  if (d > 1 && a[d - 1] === 'N') notes.push('夜勤明けで間隔が短い');
-  if (k === 'N' && isWork(a[d + 1])) notes.push(`翌日の${SH[a[d + 1]].name}まで間隔が短い`);
-  if (d > 1 && a[d - 1] === 'L' && k === 'D') notes.push('前日 遅番');
-  if (s.weekMax) { if (st.wk[weekIdx(d)] > s.weekMax) notes.push('週契約時間を超える'); }
-  else if (st.min > s.target) notes.push(`月間${hrs(st.min)}で超過`);
-  if (k === 'N' && st.n > s.nMax) notes.push('夜勤上限を超える');
-  const rl = runLen(sim, d); if (rl > RUN_MAX) notes.push(`${rl}日連続になる`);
-  if (partners(state.asg, s, d, k, '回避').length) notes.push('相性「回避」の職員と同じ勤務');
+  if (isWork(cur)) notes.push(`当日の${pk(cur).name}から移動`);
+  const av = availOf(s.id, d); if (av && !fits(k, av)) notes.push(`勤務可能時間（${av.from}〜${av.to}）の外`);
+  if (d > 1 && isWork(a[d - 1]) && gapBetween(a[d - 1], k) < db.gapMin) notes.push(`前日の${pk(a[d - 1]).name}から間隔が短い`);
+  if (isWork(a[d + 1]) && gapBetween(k, a[d + 1]) < db.gapMin) notes.push(`翌日の${pk(a[d + 1]).name}まで間隔が短い`);
+  if (s.contract === 'week') { if (st.wk[weekIdx(d)] > s.weekMin) notes.push('週契約時間を超える'); }
+  else if (st.min > s.monthMin) notes.push(`月間${hrs(st.min)}で超過`);
+  if (crosses(k) && st.n > s.nMax) notes.push('夜勤上限を超える');
+  const rl = runLen(sim, d); if (rl > db.runMax) notes.push(`${rl}日連続になる`);
+  if (partners(db.asg, s, d, k, '回避').length) notes.push('相性「回避」の職員と同じ勤務');
+  const w = wishOf(s.id, d); if (w && w.k === k) notes.unshift('本人の勤務希望どおり');
   if (cur === 'O') notes.push('休みを勤務に変更');
-  return { ok: true, notes, util: st.min / s.target };
+  return { ok: true, notes: notes.filter(n => n !== '本人の勤務希望どおり'), good: !!(w && w.k === k), util: st.min / target(s) };
 }
 
-/* ---------- 描画 ---------- */
+/* ---------- 保存 ---------- */
+function save() { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) { /* 保存できない環境では保持しない */ } }
+function load() { try { const raw = localStorage.getItem(STORE); if (!raw) return null; const s = JSON.parse(raw); return s && s.asg && s.patterns && s.staff ? s : null; } catch (e) { return null; } }
+function recompute() { ensureAsg(); ui.issues = validate(db.asg); save(); }
+function edited() {
+  if (db.status !== 'draft') { db.status = 'draft'; toast(db.published ? '修正版の下書きとして編集しています。公開中の版はそのままです。' : '確定を取り消し、下書きに戻しました。'); }
+}
+function resetAll() {
+  db = seedDb(); ensureAsg(); db.asg.s2[10] = 'N';
+  db.asg = generate(db.seed);
+  ui.sel = null; ui.picked = []; recompute(); ui.sel = defaultSel();
+}
+
+/* ---------- 共通の描画 ---------- */
 const LOCK = '<svg class="lock" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10V8a5 5 0 0110 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H6a1 1 0 01-1-1V11a1 1 0 011-1zm2 0h6V8a3 3 0 00-6 0z"/></svg>';
-const range = ([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+const chip = (k, compact) => { const p = pk(k); return p ? `<span class="chip ${p.color}">${esc(compact ? p.short : p.name)}</span>` : ''; };
+const badge = st => `<span class="badge b-${st}">${ST_NAMES[st]}</span>`;
+const jobDot = s => `<span class="dot ${s.job === '看護師' ? 'rn' : 'cw'}" aria-hidden="true"></span>`;
+const ROUTES = [['shift', 'シフト'], ['requests', '希望・申請'], ['staff', '職員'], ['config', '設定']];
+const allowedRoutes = () => ui.role === 'staff' ? ['shift', 'requests'] : ROUTES.map(r => r[0]);
 
-function recompute() { state.issues = validate(state.asg); renderAll(); }
-function renderAll() { renderHead(); renderGrid(); renderSide(); renderFooter(); }
-
-function renderHead() {
-  const map = { draft: '下書き', confirmed: `確定済み（第${state.version}版）`, published: `公開済み（第${state.published}版）` };
-  let label = map[state.status];
-  if (state.status === 'draft' && state.published) label = `修正版の下書き（公開中：第${state.published}版）`;
-  $('#status-label').textContent = label;
-  const wk = state.view === 'week';
-  $('#v-week').setAttribute('aria-pressed', wk); $('#v-month').setAttribute('aria-pressed', !wk);
-  $('#b-prev').disabled = !wk || state.week === 0; $('#b-next').disabled = !wk || state.week === WEEKS.length - 1;
-  const [a, b] = wk ? WEEKS[state.week] : [1, DAYS];
-  $('#range').textContent = `${fmtD(a)} – ${fmtD(b)}`;
+function render() {
+  closePop(false);
+  const pend = db.requests.filter(r => r.status === 'pending').length + db.changes.filter(c => c.status === 'pending').length;
+  $('#nav').innerHTML = ROUTES.filter(r => allowedRoutes().includes(r[0])).map(([id, name]) =>
+    `<a href="#${id}" ${ui.route === id ? 'aria-current="page"' : ''}>${name}${id === 'requests' && pend && ui.role !== 'staff' ? `<span class="cnt" aria-label="承認待ち${pend}件">${pend}</span>` : ''}</a>`).join('');
+  $('#role-sel').value = ui.role;
+  const v = $('#view');
+  if (ui.route === 'shift') v.innerHTML = ui.role === 'staff' ? pageMyShift() : pageShift();
+  else if (ui.route === 'requests') v.innerHTML = pageRequests();
+  else if (ui.route === 'staff') v.innerHTML = pageStaff();
+  else v.innerHTML = pageConfig();
 }
+const statusText = () => {
+  if (db.status === 'confirmed') return `確定済み（第${db.version}版）`;
+  if (db.status === 'published') return `公開済み（第${db.published}版）`;
+  return db.published ? `修正版の下書き（公開中：第${db.published}版）` : '下書き';
+};
 
-function renderGrid() {
-  const compact = state.view === 'month';
-  const days = range(compact ? [1, DAYS] : WEEKS[state.week]);
-  const sel = state.sel;
+/* ---------- シフト画面 ---------- */
+function gridHtml({ asg, days, compact, editable, me }) {
+  const sel = editable ? ui.sel : null;
   const bad = new Set();
-  state.issues.filter(i => i.sev === 'severe').forEach(i => { bad.add(i.sid + '|' + i.d); if (i.sid2) bad.add(i.sid2 + '|' + i.d); });
-  let h = `<table class="grid ${compact ? 'compact' : ''}"><thead><tr><th class="nm-h" scope="col">職員 <span class="muted">(${STAFF.length}名)</span></th>`;
+  if (editable) ui.issues.filter(i => i.sev === 'severe').forEach(i => { bad.add(i.sid + '|' + i.d); if (i.sid2) bad.add(i.sid2 + '|' + i.d); });
+  const ks = order();
+  let h = `<table class="grid ${compact ? 'compact' : ''}"><thead><tr><th class="nm-h" scope="col">職員 <span class="muted">(${active().length}名)</span></th>`;
   for (const d of days) {
-    const note = HOL[d] || EXC_NOTE[d] || '';
-    const cls = [(dowOf(d) === 0 || HOL[d]) ? 'sun' : '', dowOf(d) === 6 ? 'sat' : '', sel && sel.d === d ? 'on' : ''].join(' ');
+    const c = calOf(d), note = [c ? `${c.kind}：${c.name}` : '', exNote(d)].filter(Boolean).join('／');
+    const cls = [isRedDay(d) ? 'sun' : '', dowOf(d) === 6 ? 'sat' : '', sel && sel.d === d ? 'on' : ''].join(' ');
     h += `<th scope="col" class="dh ${cls}" title="${esc(note)}">${compact ? `${d}<br><span>${DOW[dowOf(d)]}</span>` : `11/${d}<br><span>(${DOW[dowOf(d)]})</span>`}${note ? `<i class="calmark" aria-label="${esc(note)}"></i>` : ''}</th>`;
   }
-  h += `</tr><tr><th class="nm-h sub" scope="row">配置 / 必要</th>`;
-  for (const d of days) {
-    h += `<td class="cov ${sel && sel.d === d ? 'on' : ''}"><div class="cov-in">`;
-    for (const k of KS) {
-      let need = 0, have = 0, short = false;
-      for (const r of ROLES) { const n = req(d, k, r), hv = countOn(state.asg, d, k, r); need += n; have += hv; if (hv < n) short = true; }
-      const cur = sel && sel.d === d && sel.k === k;
-      if (compact) { if (k !== 'D') continue; }
-      if (compact) {
-        let ns = 0; KS.forEach(kk => ROLES.forEach(r => { if (countOn(state.asg, d, kk, r) < req(d, kk, r)) ns++; }));
-        h += `<button class="cov-b ${ns ? 'short' : 'none'}" data-act="sel" data-d="${d}" aria-label="${fmtD(d)} 不足${ns}件">${ns ? '不' + ns : '✓'}</button>`;
-      } else {
-        h += `<button class="cov-b ${short ? 'short' : ''} ${need === 0 ? 'none' : ''} ${cur ? 'cur' : ''}" data-act="sel" data-d="${d}" data-k="${k}" aria-label="${fmtD(d)} ${SH[k].name} 配置${have}名 必要${need}名"><span>${SH[k].short}</span><b>${have}/${need}</b></button>`;
-      }
-    }
-    h += `</div></td>`;
-  }
-  h += `</tr></thead><tbody>`;
-  for (const s of STAFF) {
-    const st = staffStats(state.asg[s.id]);
-    h += `<tr><th scope="row" class="nm"><div class="nm-in"><span class="dot ${s.role === '看護師' ? 'rn' : 'cw'}" aria-hidden="true"></span><div><b>${esc(s.name)}</b><small>${s.role}　${s.emp}</small><small class="tn">${hrs(st.min)}/${hrs(s.target)}${s.weekMax ? '目安' : ''}・夜${st.n}</small></div></div></th>`;
+  h += '</tr>';
+  if (editable) {
+    h += `<tr><th class="nm-h sub" scope="row">配置 / 必要</th>`;
     for (const d of days) {
-      const v = state.asg[s.id][d], locked = !!state.lock[s.id + '|' + d];
-      const off = OFF[s.id] && OFF[s.id].includes(d);
-      const ake = !isWork(v) && d > 1 && state.asg[s.id][d - 1] === 'N';
-      const hl = sel && sel.k && sel.d === d && v === sel.k && s.role === sel.role;
-      let inner, label;
-      if (isWork(v)) { inner = `<span class="chip ${SH[v].cls}">${compact ? SH[v].short : SH[v].name}</span>`; label = SH[v].name; }
-      else if (off) { inner = `<span class="chip req">${compact ? '希' : '希望休'}</span>`; label = '希望休'; }
-      else if (v === 'O') { inner = `<span class="chip off">休</span>`; label = '休'; }
-      else if (ake) { inner = `<span class="ake">明</span>`; label = '夜勤明け'; }
-      else { inner = `<span class="none">—</span>`; label = '勤務なし'; }
-      h += `<td class="${sel && sel.d === d ? 'on' : ''}"><button class="cell ${hl ? 'hl' : ''} ${bad.has(s.id + '|' + d) ? 'bad' : ''}" data-act="cell" data-s="${s.id}" data-d="${d}" aria-label="${esc(s.name)} ${fmtD(d)} ${label}${locked ? '（固定）' : ''}">${inner}${locked ? LOCK : ''}</button></td>`;
+      h += `<td class="cov ${sel && sel.d === d ? 'on' : ''}"><div class="cov-in">`;
+      if (compact) {
+        let ns = 0; ks.forEach(k => JOBS.forEach(j => { if (countOn(asg, d, k, j) < req(d, k, j)) ns++; }));
+        h += `<button class="cov-b ${ns ? 'short' : 'none'}" data-act="sel" data-d="${d}" aria-label="${fmtD(d)} 不足${ns}件">${ns ? '不' + ns : '✓'}</button>`;
+      } else for (const k of ks) {
+        let need = 0, have = 0, short = false;
+        for (const j of JOBS) { const n = req(d, k, j), hv = countOn(asg, d, k, j); need += n; have += hv; if (hv < n) short = true; }
+        const cur = sel && sel.d === d && sel.k === k;
+        h += `<button class="cov-b ${short ? 'short' : ''} ${need === 0 ? 'none' : ''} ${cur ? 'cur' : ''}" data-act="sel" data-d="${d}" data-k="${k}" aria-label="${fmtD(d)} ${esc(pk(k).name)} 配置${have}名 必要${need}名"><span>${esc(pk(k).short)}</span><b>${have}/${need}</b></button>`;
+      }
+      h += `</div></td>`;
     }
     h += '</tr>';
   }
-  h += '</tbody></table>';
-  $('#grid').innerHTML = h;
-  const sev = state.issues.filter(i => i.sev === 'severe').length;
-  $('#legend').innerHTML = KS.map(k => `<span><span class="chip ${SH[k].cls}">${SH[k].name}</span>${SH[k].time}</span>`).join('') +
-    `<span><span class="chip off">休</span>休日</span><span><span class="chip req">希望休</span>承認済み</span><span><span class="ake">明</span>夜勤明け</span>` +
-    `<span>${LOCK.replace('class="lock"', 'class="lock-i"')}固定（再作成で変えない）</span>` +
-    `<span class="sev-badge ${sev ? 'ng' : 'ok'}">${sev ? '!' : '✓'} 重大違反 ${sev}件</span>`;
+  h += `</thead><tbody>`;
+  for (const s of active()) {
+    const a = asg[s.id] || [], st = staffStats(a), off = offSet(s.id);
+    h += `<tr class="${me === s.id ? 'me' : ''}"><th scope="row" class="nm"><div class="nm-in">${jobDot(s)}<div><b>${esc(s.name)}</b><small>${s.job}　${s.emp}</small>${editable ? `<small class="tn">${hrs(st.min)}/${hrs(target(s))}${s.contract === 'week' ? '目安' : ''}・夜${st.n}</small>` : ''}</div></div></th>`;
+    for (const d of days) {
+      const v = a[d], locked = editable && !!db.lock[s.id + '|' + d];
+      const ake = !isWork(v) && d > 1 && isWork(a[d - 1]) && crosses(a[d - 1]);
+      const hl = sel && sel.k && sel.d === d && v === sel.k && s.job === sel.j;
+      let inner, label;
+      if (isWork(v)) { inner = chip(v, compact); label = pk(v).name; }
+      else if (off.has(d)) { inner = `<span class="chip req">${compact ? '希' : '希望休'}</span>`; label = '希望休'; }
+      else if (v === 'O') { inner = `<span class="chip off">休</span>`; label = '休'; }
+      else if (ake) { inner = `<span class="ake">明</span>`; label = '夜勤明け'; }
+      else { inner = `<span class="none">—</span>`; label = '勤務なし'; }
+      const aria = `${esc(s.name)} ${fmtD(d)} ${esc(label)}${locked ? '（固定）' : ''}`;
+      h += `<td class="${sel && sel.d === d ? 'on' : ''}">` + (editable
+        ? `<button class="cell ${hl ? 'hl' : ''} ${bad.has(s.id + '|' + d) ? 'bad' : ''}" data-act="cell" data-s="${s.id}" data-d="${d}" aria-label="${aria}">${inner}${locked ? LOCK : ''}</button>`
+        : `<div class="cell" role="img" aria-label="${aria}">${inner}</div>`) + `</td>`;
+    }
+    h += '</tr>';
+  }
+  return h + '</tbody></table>';
 }
-
-function renderSide() {
-  const shorts = state.issues.filter(i => i.cat === '配置不足');
-  const sel = state.sel;
+function legendHtml(withSev) {
+  const sev = ui.issues.filter(i => i.sev === 'severe').length;
+  return order().map(k => `<span>${chip(k)}${toHM(pk(k).start)}–${crosses(k) ? '翌' : ''}${toHM(pk(k).end)}</span>`).join('') +
+    `<span><span class="chip off">休</span>休日</span><span><span class="chip req">希望休</span>承認済み</span><span><span class="ake">明</span>夜勤明け</span>` +
+    (withSev ? `<span>${LOCK.replace('class="lock"', 'class="lock-i"')}固定（再作成で変えない）</span><span class="sev-badge ${sev ? 'ng' : 'ok'}">${sev ? '!' : '✓'} 重大違反 ${sev}件</span>` : '');
+}
+function pageShift() {
+  const compact = ui.view === 'month', wk = !compact;
+  const [a, b] = wk ? WEEKS[ui.week] : [1, DAYS];
+  return `<div class="wrap" style="padding-block:22px 0">
+  <div class="titlebar">
+    <div><h1>配置を整える</h1><p class="sub">2026年11月・<span class="state-tag">${statusText()}</span><span class="proto">試作・サンプルデータ</span></p></div>
+    <div class="actions">
+      <button class="btn primary" data-act="regen"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 2l1.8 5.2L17 9l-5.2 1.8L10 16l-1.8-5.2L3 9l5.2-1.8zM18 13l.9 2.6 2.6.9-2.6.9L18 20l-.9-2.6-2.6-.9 2.6-.9z"/></svg>固定を保持して再作成</button>
+      <button class="btn" data-act="csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>CSV出力</button>
+    </div>
+  </div>
+  <div class="layout">
+    <section class="board neu" aria-label="シフト表">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="表示切替">
+          <button data-act="view" data-v="month" aria-pressed="${compact}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>月間シフト</button>
+          <button data-act="view" data-v="week" aria-pressed="${wk}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h8"/></svg>週表示</button>
+        </div>
+        <div class="mnav">
+          <button class="iconbtn" data-act="prev" aria-label="前の週" ${!wk || ui.week === 0 ? 'disabled' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <strong>2026年11月</strong>
+          <button class="iconbtn" data-act="next" aria-label="次の週" ${!wk || ui.week === WEEKS.length - 1 ? 'disabled' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <span class="range tn">${fmtD(a)} – ${fmtD(b)}</span>
+      </div>
+      <div class="grid-wrap" id="grid">${gridHtml({ asg: db.asg, days: range([a, b]), compact, editable: true })}</div>
+      <div class="legend">${legendHtml(true)}</div>
+    </section>
+    <aside class="side neu" id="side" aria-label="配置の詳細">${sideHtml()}</aside>
+  </div></div>
+  ${stepbarHtml()}`;
+}
+function sideHtml() {
+  const shorts = ui.issues.filter(i => i.cat === '配置不足'), sel = ui.sel;
   let h = `<div class="side-h"><span class="ic-warn ${shorts.length ? '' : 'ok'}" aria-hidden="true">${shorts.length ? '!' : '✓'}</span><h2>配置不足<em class="tn">${shorts.length}件</em></h2></div>`;
   if (!shorts.length) h += `<p class="hint">今月の配置不足はありません。</p>`;
   else {
-    const list = state.showAll ? shorts : shorts.slice(0, 4);
+    const list = ui.showAll ? shorts : shorts.slice(0, 4);
     h += '<ul class="short-list">' + list.map(i => {
-      const on = sel && sel.d === i.d && sel.k === i.k && sel.role === i.r;
-      return `<li><button class="short ${on ? 'on' : ''}" data-act="sel" data-d="${i.d}" data-k="${i.k}" data-r="${i.r}"><span><b>${fmtD(i.d)} ${SH[i.k].name}・${i.r}</b><small class="tn">必要 ${i.need}名 / 配置 ${i.have}名</small></span><span class="chev" aria-hidden="true">›</span></button></li>`;
+      const on = sel && sel.d === i.d && sel.k === i.k && sel.j === i.j;
+      return `<li><button class="short ${on ? 'on' : ''}" data-act="sel" data-d="${i.d}" data-k="${i.k}" data-j="${i.j}"><span><b>${fmtD(i.d)} ${esc(pk(i.k).name)}・${i.j}</b><small class="tn">必要 ${i.need}名 / 配置 ${i.have}名</small></span><span class="chev" aria-hidden="true">›</span></button></li>`;
     }).join('') + '</ul>';
-    if (shorts.length > 4) h += `<button class="link" data-act="more">${state.showAll ? '折りたたむ' : `ほか${shorts.length - 4}件を表示`}</button>`;
+    if (shorts.length > 4) h += `<button class="link" data-act="more">${ui.showAll ? '折りたたむ' : `ほか${shorts.length - 4}件を表示`}</button>`;
   }
-  if (sel && sel.k) {
-    const { d, k, role } = sel;
-    const need = req(d, k, role), have = countOn(state.asg, d, k, role);
-    const other = ROLES.find(r => r !== role);
-    h += `<div class="detail"><h3>${fmtD(d)} ${SH[k].name}・${role}</h3><span class="pill tn ${have < need ? 'warn' : 'ok'}">必要 ${need}名 / 配置 ${have}名</span>
-      <button class="link" data-act="sel" data-d="${d}" data-k="${k}" data-r="${other}" style="margin-left:10px">${other}を見る</button>
-      ${HOL[d] || EXC_NOTE[d] ? `<p class="cal-note">${esc([HOL[d] ? `祝日（${HOL[d]}）` : '', EXC_NOTE[d] || ''].filter(Boolean).join('　'))}</p>` : ''}`;
-    const cands = STAFF.filter(s => s.role === role && state.asg[s.id][d] !== k).map(s => ({ s, e: evalCand(s, d, k) }));
-    const ok = cands.filter(c => c.e.ok).sort((x, y) => x.e.notes.length - y.e.notes.length || x.e.util - y.e.util);
-    const ng = cands.filter(c => !c.e.ok);
+  if (sel && sel.k && pk(sel.k)) {
+    const { d, k, j } = sel, need = req(d, k, j), have = countOn(db.asg, d, k, j), other = JOBS.find(x => x !== j);
+    const c = calOf(d), notes = [c ? `${c.kind}（${c.name}）` : '', exNote(d)].filter(Boolean).join('　');
+    h += `<div class="detail"><h3>${fmtD(d)} ${esc(pk(k).name)}・${j}</h3><span class="pill tn ${have < need ? 'warn' : 'ok'}">必要 ${need}名 / 配置 ${have}名</span>
+      <button class="link" data-act="sel" data-d="${d}" data-k="${k}" data-j="${other}" style="margin-left:10px">${other}を見る</button>${notes ? `<p class="cal-note">${esc(notes)}</p>` : ''}`;
+    const cands = active().filter(s => s.job === j && db.asg[s.id][d] !== k).map(s => ({ s, e: evalCand(s, d, k) }));
+    const ok = cands.filter(x => x.e.ok).sort((x, y) => (y.e.good - x.e.good) || x.e.notes.length - y.e.notes.length || x.e.util - y.e.util);
+    const ng = cands.filter(x => !x.e.ok);
     h += `<h4>配置候補<small>勤務条件を満たす職員</small></h4>`;
-    h += ok.length ? '<ul class="cands">' + ok.map(({ s, e }) => `<li><button class="cand" data-act="assign" data-s="${s.id}" data-d="${d}" data-k="${k}"><span class="dot ${s.role === '看護師' ? 'rn' : 'cw'}" aria-hidden="true"></span><span><b>${esc(s.name)}</b><small>${s.role}　${s.emp}</small><span class="st ${e.notes.length ? 'w' : ''}">勤務可能</span><small>${e.notes.length ? esc(e.notes.join('、')) : '条件内（注意事項なし）'}</small></span><span class="go">配置する ›</span></button></li>`).join('') + '</ul>'
-      : `<p class="hint">この勤務に入れる${role}がいません。必要人数の見直しか、理由を記録して確定してください。</p>`;
-    if (ng.length) h += `<details class="more"><summary>配置できない職員 ${ng.length}名</summary><ul class="cands">${ng.map(({ s, e }) => `<li><div class="cand no"><span class="dot ${s.role === '看護師' ? 'rn' : 'cw'}" aria-hidden="true"></span><span><b>${esc(s.name)}</b><small>${s.emp}</small><span class="st">${esc(e.why)}</span></span><span></span></div></li>`).join('')}</ul></details>`;
-    const placed = STAFF.filter(s => s.role === role && state.asg[s.id][d] === k);
-    h += `<h4>現在の配置</h4>`;
-    h += placed.length ? '<ul class="placed">' + placed.map(s => { const lk = !!state.lock[s.id + '|' + d]; return `<li><span class="tag">配置済</span><span class="pn">${esc(s.name)}</span><span class="pr">${s.emp}${lk ? '・固定' : ''}</span><span class="acts"><button class="btn sm ghost" data-act="lock" data-s="${s.id}" data-d="${d}" aria-pressed="${lk}">${lk ? '固定を外す' : '固定する'}</button><button class="btn sm ghost" data-act="remove" data-s="${s.id}" data-d="${d}">外す</button></span></li>`; }).join('') + '</ul>'
-      : `<p class="hint">まだ誰も配置されていません。</p>`;
+    h += ok.length ? '<ul class="cands">' + ok.map(({ s, e }) => `<li><button class="cand" data-act="assign" data-s="${s.id}" data-d="${d}" data-k="${k}">${jobDot(s)}<span><b>${esc(s.name)}</b><small>${s.job}　${s.emp}</small><span class="st ${e.notes.length ? 'w' : ''}">勤務可能${e.good ? '（本人の希望どおり）' : ''}</span><small>${e.notes.length ? esc(e.notes.join('、')) : '条件内（注意事項なし）'}</small></span><span class="go">配置する ›</span></button></li>`).join('') + '</ul>'
+      : `<p class="hint">この勤務に入れる${j}がいません。必要人数を見直すか、理由を記録して確定してください。</p>`;
+    if (ng.length) h += `<details class="more"><summary>配置できない職員 ${ng.length}名</summary><ul class="cands">${ng.map(({ s, e }) => `<li><div class="cand no">${jobDot(s)}<span><b>${esc(s.name)}</b><small>${s.emp}</small><span class="st">${esc(e.why)}</span></span><span></span></div></li>`).join('')}</ul></details>`;
+    const placed = active().filter(s => s.job === j && db.asg[s.id][d] === k);
+    h += `<h4>現在の配置</h4>` + (placed.length ? '<ul class="placed">' + placed.map(s => { const lk = !!db.lock[s.id + '|' + d]; return `<li><span class="tag">配置済</span><span class="pn">${esc(s.name)}</span><span class="pr">${s.emp}${lk ? '・固定' : ''}</span><span class="acts"><button class="btn sm ghost" data-act="lock" data-s="${s.id}" data-d="${d}" aria-pressed="${lk}">${lk ? '固定を外す' : '固定する'}</button><button class="btn sm ghost" data-act="remove" data-s="${s.id}" data-d="${d}">外す</button></span></li>`; }).join('') + '</ul>' : `<p class="hint">まだ誰も配置されていません。</p>`);
     h += '</div>';
-  } else {
-    h += `<p class="hint" style="margin-top:16px">表の「配置 / 必要」の数字か、上の不足一覧を押すと、その勤務の配置候補を表示します。</p>`;
-  }
-  $('#side').innerHTML = h;
+  } else h += `<p class="hint" style="margin-top:16px">表の「配置 / 必要」の数字か、上の不足一覧を押すと、その勤務の配置候補を表示します。</p>`;
+  return h;
 }
-
-function renderFooter() {
-  const st = state.status;
+function stepbarHtml() {
+  const st = db.status, curI = st === 'draft' ? 0 : st === 'confirmed' ? 1 : 2;
   const steps = [['下書き', '配置を整えて、不足の解消理由を入力します'], ['確定', '重大違反がないことを確認し、確定します'], ['公開', '職員に公開し、通知します']];
-  const curI = st === 'draft' ? 0 : st === 'confirmed' ? 1 : 2;
-  $('#steps').innerHTML = steps.map(([t, s], i) => `${i ? '<li class="arr" aria-hidden="true">⟶</li>' : ''}<li class="${i < curI || (st === 'published' && i === 2) ? 'done' : i === curI ? 'cur' : ''}" ${i === curI ? 'aria-current="step"' : ''}><span class="num">${i < curI || (st === 'published' && i === 2) ? '✓' : i + 1}</span><span><b>${t}</b><small>${s}</small></span></li>`).join('');
-  const btn = $('#btn-main');
-  const sev = state.issues.filter(i => i.sev === 'severe').length;
-  const rea = state.issues.filter(i => i.sev === 'reason');
-  const missing = rea.filter(i => !(state.reasons[i.key] || '').trim()).length;
-  const note = $('#foot-note');
-  btn.disabled = false;
+  const sev = ui.issues.filter(i => i.sev === 'severe').length;
+  const miss = ui.issues.filter(i => i.sev === 'reason' && !(db.reasons[i.key] || '').trim()).length;
+  let btn, note, nc = '';
   if (st === 'draft') {
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>確定前チェック';
-    if (sev) { note.className = 'foot-note ng'; note.textContent = `重大違反が${sev}件あるため確定できません。赤枠のセルを直してください。`; }
-    else if (missing) { note.className = 'foot-note w'; note.textContent = `理由の入力が必要な警告が${missing}件あります（確定前チェックで入力します）`; }
-    else { note.className = 'foot-note'; note.textContent = '確定できる状態です'; }
+    btn = `<button class="btn primary" data-act="main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>確定前チェック</button>`;
+    if (sev) { nc = 'ng'; note = `重大違反が${sev}件あるため確定できません。赤枠のセルを直してください。`; }
+    else if (miss) { nc = 'w'; note = `理由の入力が必要な警告が${miss}件あります（確定前チェックで入力します）`; }
+    else note = '確定できる状態です';
   } else if (st === 'confirmed') {
-    btn.innerHTML = '公開する…'; note.className = 'foot-note'; note.textContent = `第${state.version}版を確定しました。公開すると職員が閲覧できます。`;
-  } else {
-    btn.innerHTML = '公開済み'; btn.disabled = true; note.className = 'foot-note'; note.textContent = `第${state.published}版を公開中です。表を変えると修正版の下書きになります。`;
-  }
+    btn = `<button class="btn primary" data-act="main" ${can('decide') ? '' : 'disabled'}>公開する…</button>`;
+    note = can('decide') ? `第${db.version}版を確定しました。公開すると職員が閲覧できます。` : '公開はシステム管理者が行います（仮の権限設定）';
+  } else { btn = `<button class="btn primary" disabled>公開済み</button>`; note = `第${db.published}版を公開中です。表を変えると修正版の下書きになります。`; }
+  return `<footer class="stepbar"><div class="wrap stepbar-in"><ol class="steps">${steps.map(([t, s], i) => {
+    const done = i < curI || (st === 'published' && i === 2);
+    return `${i ? '<li class="arr" aria-hidden="true">⟶</li>' : ''}<li class="${done ? 'done' : i === curI ? 'cur' : ''}" ${i === curI ? 'aria-current="step"' : ''}><span class="num">${done ? '✓' : i + 1}</span><span><b>${t}</b><small>${s}</small></span></li>`;
+  }).join('')}</ol><div class="foot-act"><div class="row">${btn}</div><div class="foot-note ${nc}">${note}</div></div></div></footer>`;
 }
 
-/* ---------- 操作 ---------- */
-function edited() {
-  if (state.status !== 'draft') { state.status = 'draft'; toast(state.published ? '修正版の下書きとして編集しています。公開中の版はそのままです。' : '確定を取り消し、下書きに戻しました。'); }
+/* 一般職員のシフト画面 */
+function pageMyShift() {
+  const me = SID(ui.me);
+  if (!db.pubAsg) return `<div class="wrap" style="padding-block:22px 28px"><div class="titlebar"><div><h1>11月のシフト</h1><p class="sub">${esc(me.name)}さん</p></div></div><section class="card neu"><div class="empty">11月のシフトはまだ公開されていません。公開されると、ここに表示されます。</div></section></div>`;
+  const a = db.pubAsg[me.id] || [], st = staffStats(a);
+  const mine = range([1, DAYS]).filter(d => isWork(a[d]));
+  const myCh = db.changes.filter(c => c.sid === me.id && c.status === 'pending').length;
+  return `<div class="wrap" style="padding-block:22px 28px">
+  <div class="titlebar"><div><h1>11月のシフト</h1><p class="sub">公開版 第${db.published}版・<span class="state-tag">${esc(me.name)}さん</span></p></div>
+  <div class="actions"><a class="btn" href="#requests" data-act="go-change">勤務の変更を申請する</a></div></div>
+  ${myCh ? `<div class="banner w"><b>申請中</b>勤務の変更申請が${myCh}件あります。承認されると、再公開後にこの表へ反映されます。</div>` : ''}
+  <div class="cols">
+    <section class="card neu"><h2>自分の勤務</h2><div class="stats"><div class="stat"><b class="tn">${mine.length}日</b>勤務日数</div><div class="stat"><b class="tn">${hm(st.min)}</b>計画勤務時間</div><div class="stat"><b class="tn">${st.n}回</b>夜勤</div></div>
+      <ul class="mylist">${mine.map(d => `<li><b class="tn">${fmtD(d)}</b>${chip(a[d])}<span class="t tn">${toHM(pk(a[d]).start)}–${crosses(a[d]) ? '翌' : ''}${toHM(pk(a[d]).end)}・休憩${pk(a[d]).brk}分</span></li>`).join('')}</ul></section>
+    <section class="card neu" style="min-width:0"><h2>全体のシフト<small>あなたの行を色付けしています</small></h2>
+      <div class="grid-wrap" style="margin-top:12px">${gridHtml({ asg: db.pubAsg, days: range([1, DAYS]), compact: true, editable: false, me: me.id })}</div>
+      <div class="legend">${legendHtml(false)}</div></section>
+  </div></div>`;
 }
-function setCell(sid, d, v) { state.asg[sid][d] = v; state.lock[sid + '|' + d] = true; edited(); recompute(); }
-function pickSel(d, k, r) {
-  if (!k) { // 月間表示：その日の最初の不足
-    for (const kk of KS) for (const rr of ROLES) if (countOn(state.asg, d, kk, rr) < req(d, kk, rr)) return { d, k: kk, role: rr };
-    return { d, k: 'D', role: '看護師' };
+
+/* ---------- 希望・申請 ---------- */
+function deadlineInfo() {
+  const dl = new Date(db.deadline + 'T23:59:59');
+  const left = Math.ceil((dl - new Date()) / 86400000);
+  const [y, m, d] = db.deadline.split('-').map(Number);
+  return { passed: new Date() > dl, text: `${m}/${d}(${'日月火水木金土'[new Date(y, m - 1, d).getDay()]}) 23:59`, left };
+}
+function pageRequests() {
+  const tabs = `<div class="subnav seg" role="group" aria-label="申請の種類"><button data-act="reqtab" data-v="wish" aria-pressed="${ui.reqTab === 'wish'}">希望休・勤務希望</button><button data-act="reqtab" data-v="change" aria-pressed="${ui.reqTab === 'change'}">公開後の変更申請</button></div>`;
+  return `<div class="wrap" style="padding-block:22px 28px"><div class="titlebar"><div><h1>希望・申請</h1><p class="sub">2026年11月分<span class="proto">試作・サンプルデータ</span></p></div></div>${tabs}${ui.reqTab === 'wish' ? wishTab() : changeTab()}</div>`;
+}
+function wishTab() {
+  const staffMode = ui.role === 'staff';
+  const sid = staffMode ? ui.me : ui.reqStaff, s = SID(sid);
+  const dl = deadlineInfo();
+  const mine = db.requests.filter(r => r.sid === sid);
+  const usedOff = mine.filter(r => r.type === 'off' && (r.status === 'pending' || r.status === 'approved')).length;
+  const t = ui.reqType;
+  // カレンダー
+  let cal = DOW.map((w, i) => `<span class="wd ${i === 0 ? 'sun' : i === 6 ? 'sat' : ''}">${w}</span>`).join('');
+  for (let d = 1; d <= DAYS; d++) {
+    const rs = mine.filter(r => r.d === d && r.status !== 'withdrawn' && r.status !== 'rejected');
+    const lab = rs.map(r => r.type === 'off' ? '休' : r.type === 'wish' ? (pk(r.k) ? pk(r.k).short : '希') : '時').join('');
+    const cls = [ui.picked.includes(d) ? 'sel' : '', rs.some(r => r.status === 'approved') ? 'has-ap' : '', rs.some(r => r.status === 'pending') ? 'has-pd' : '', isRedDay(d) ? 'hol' : ''].join(' ');
+    cal += `<button type="button" class="cday ${cls}" data-act="pick" data-d="${d}" aria-pressed="${ui.picked.includes(d)}" aria-label="${fmtD(d)}${lab ? ' 申請あり' : ''}">${d}<small>${esc(lab) || '&nbsp;'}</small></button>`;
   }
-  if (r) return { d, k, role: r };
-  const short = ROLES.find(rr => countOn(state.asg, d, k, rr) < req(d, k, rr));
-  return { d, k, role: short || ROLES.find(rr => req(d, k, rr) > 0) || '看護師' };
+  const lock = staffMode && dl.passed;
+  const form = `<section class="card neu"><h2>希望を出す</h2><p class="lead">日付を選んで、種類を指定してください。${staffMode ? '' : '管理者・作成者は職員の代わりに入力できます。'}</p>
+    <form data-form="request"><fieldset ${lock ? 'disabled' : ''}>
+    ${staffMode ? '' : `<label class="f"><span>職員</span><select id="rq-staff" data-bind="reqStaff">${active().map(x => `<option value="${x.id}" ${x.id === sid ? 'selected' : ''}>${esc(x.name)}（${x.job}・${x.emp}）</option>`).join('')}</select></label>`}
+    <div class="stats"><div class="stat ${dl.passed ? 'w' : ''}"><b class="tn">${dl.text}</b>締切${dl.passed ? '（締切済み）' : `まであと${dl.left}日`}</div><div class="stat ${usedOff >= s.offCap ? 'w' : ''}"><b class="tn">${usedOff} / ${s.offCap}日</b>希望休（申請中＋承認済み）</div></div>
+    <div class="cal7" role="group" aria-label="11月の日付">${cal}</div>
+    <p class="hint" style="margin:6px 0 12px">選択中：${ui.picked.length ? ui.picked.map(fmtD).join('、') : 'なし'}　<span class="muted">休＝希望休、日・遅・夜＝勤務希望、時＝勤務可能時間</span></p>
+    <div class="radios" role="radiogroup" aria-label="種類">${Object.entries(REQ_TYPES).map(([k, v]) => `<label><input type="radio" name="rq-type" value="${k}" data-bind="reqType" ${t === k ? 'checked' : ''}>${v}</label>`).join('')}</div>
+    <div class="form-row" style="margin-top:12px">
+      ${t === 'wish' ? `<label class="f"><span>希望する勤務</span><select id="rq-k">${PAT().map(p => `<option value="${p.key}">${esc(p.name)}</option>`).join('')}</select></label>` : ''}
+      ${t === 'avail' ? `<label class="f"><span>開始</span><input type="time" id="rq-from" value="09:00"></label><label class="f"><span>終了</span><input type="time" id="rq-to" value="16:00"></label>` : ''}
+    </div>
+    <label class="f" style="margin-top:12px"><span>コメント（任意）</span><textarea id="rq-comment" rows="2" placeholder="例：通院のため"></textarea></label>
+    <p class="f"><span class="err" id="rq-err" role="alert"></span></p>
+    <div class="m-foot" style="margin-top:6px"><button type="button" class="btn ghost" data-act="pick-clear">選択を解除</button><button class="btn primary" type="submit">${t === 'off' ? '申請する' : '登録する'}</button></div>
+    </fieldset></form>
+    ${lock ? '<p class="hint">締切を過ぎたため申請できません。必要な場合はシフト作成者に相談してください。</p>' : ''}
+    <p class="hint">希望休は管理者の承認後に確定します。勤務希望と勤務可能時間は登録した時点で自動作成に使います（仮）。</p></section>`;
+  // 一覧
+  const showAll = !staffMode;
+  let list = showAll ? db.requests.slice() : mine.slice();
+  if (ui.reqFilter !== 'all') list = list.filter(r => r.status === ui.reqFilter);
+  list.sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1) || a.d - b.d);
+  const pend = db.requests.filter(r => r.status === 'pending').length;
+  const item = r => {
+    const st = SID(r.sid), detail = r.type === 'wish' ? `${pk(r.k) ? pk(r.k).name : '（削除された勤務）'}を希望` : r.type === 'avail' ? `${r.from}〜${r.to}のみ勤務可能` : '終日休み';
+    let acts = '';
+    if (r.status === 'pending' && can('decide')) acts = `<div class="acts"><input type="text" id="note-${r.id}" placeholder="却下の理由（却下時は必須）" aria-label="却下の理由"><button class="btn sm danger" data-act="reject" data-id="${r.id}">却下</button><button class="btn sm primary" data-act="approve" data-id="${r.id}">承認</button></div>`;
+    else if (r.status === 'pending' && ui.role === 'maker') acts = `<p class="hint" style="margin:0">承認はシステム管理者が行います（仮の権限設定）</p>`;
+    if ((r.status === 'pending' || (r.type !== 'off' && r.status === 'approved')) && (staffMode ? r.sid === ui.me : true)) acts += `<div class="acts"><button class="btn sm ghost" data-act="withdraw" data-id="${r.id}">取り下げる</button></div>`;
+    return `<li class="req-item"><div class="top">${badge(r.status)}<b>${showAll ? esc(st ? st.name : '') + '　' : ''}${fmtD(r.d)}</b><span>${REQ_TYPES[r.type]}</span><span class="muted">${esc(detail)}</span></div>
+      ${r.comment ? `<div>「${esc(r.comment)}」</div>` : ''}<div class="meta">申請 ${esc(r.at)}${r.by ? `　判断 ${esc(r.by)}${r.decidedAt ? ' ' + esc(r.decidedAt) : ''}` : ''}${r.note ? `　理由：${esc(r.note)}` : ''}</div>${acts}</li>`;
+  };
+  const listCard = `<section class="card neu"><div class="card-h"><div><h2>${showAll ? '申請一覧' : '自分の申請'}${showAll && pend ? `<small>承認待ち ${pend}件</small>` : ''}</h2></div>
+    <label class="f" style="min-width:160px"><span>状態で絞り込む</span><select id="rq-filter" data-bind="reqFilter"><option value="all">すべて</option>${Object.entries(ST_NAMES).map(([k, v]) => `<option value="${k}" ${ui.reqFilter === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label></div>
+    ${list.length ? `<ul class="req-list">${list.map(item).join('')}</ul>` : '<div class="empty">該当する申請はありません。</div>'}</section>`;
+  return `<div class="cols">${form}${listCard}</div>`;
+}
+function changeTab() {
+  const staffMode = ui.role === 'staff';
+  if (!db.pubAsg) return `<section class="card neu"><div class="empty">公開されたシフトがまだないため、変更申請はできません。シフトを確定・公開すると申請できるようになります。</div></section>`;
+  const me = SID(ui.me), a = db.pubAsg[ui.me] || [];
+  const form = staffMode ? `<section class="card neu"><h2>勤務の変更を申請</h2><p class="lead">公開中の第${db.published}版に対する変更です。承認後、再確定・再公開で反映されます。</p>
+    <form data-form="change"><div class="form-grid">
+      <label class="f"><span>対象日</span><select id="ch-d">${range([1, DAYS]).map(d => `<option value="${d}">${fmtD(d)}　現在：${isWork(a[d]) ? esc(pk(a[d]).name) : '休み'}</option>`).join('')}</select></label>
+      <label class="f"><span>変更後</span><select id="ch-to">${PAT().map(p => `<option value="${p.key}">${esc(p.name)}</option>`).join('')}<option value="O" selected>休み</option></select></label></div>
+      <label class="f" style="margin-top:12px"><span>理由（必須）</span><textarea id="ch-reason" rows="2" placeholder="例：家族の通院付き添いのため"></textarea></label>
+      <p class="f"><span class="err" id="ch-err" role="alert"></span></p>
+      <div class="m-foot"><button class="btn primary" type="submit">申請する</button></div></form></section>` :
+    `<section class="card neu"><h2>変更申請の流れ</h2><ol class="hint" style="padding-left:1.2em;margin:8px 0 0;display:grid;gap:6px"><li>職員が公開中のシフトに対して変更を申請します（「表示する立場」を一般職員にすると試せます）。</li><li>管理者が変更前後の差分と、重大違反が増えないかを確認して承認・却下します。</li><li>承認すると修正版の下書きに反映され、固定されます。</li><li>シフト画面で確定前チェック、確定、公開を行うと職員の表示が更新されます。</li></ol></section>`;
+  const list = (staffMode ? db.changes.filter(c => c.sid === ui.me) : db.changes).slice().sort((x, y) => (x.status === 'pending' ? 0 : 1) - (y.status === 'pending' ? 0 : 1));
+  const nm = v => isWork(v) ? chip(v) : '<span class="chip off">休み</span>';
+  const item = c => {
+    const s = SID(c.sid); let acts = '', imp = '';
+    if (c.status === 'pending' && !staffMode) {
+      const sim = { ...db.asg, [c.sid]: db.asg[c.sid].slice() }; sim[c.sid][c.d] = c.to;
+      const before = ui.issues.filter(i => i.sev === 'severe').length, after = validate(sim).filter(i => i.sev === 'severe').length;
+      const shortB = ui.issues.filter(i => i.cat === '配置不足').length, shortA = validate(sim).filter(i => i.cat === '配置不足').length;
+      ui.issues = validate(db.asg);
+      imp = `<div class="impact ${after > before ? 'ng' : ''}">反映した場合：重大違反 ${before}→${after}件、配置不足 ${shortB}→${shortA}件${after > before ? '。重大違反が増えるため承認できません' : ''}</div>`;
+      acts = can('decide') ? `<div class="acts"><input type="text" id="cn-${c.id}" placeholder="却下の理由（却下時は必須）" aria-label="却下の理由"><button class="btn sm danger" data-act="ch-reject" data-id="${c.id}">却下</button><button class="btn sm primary" data-act="ch-approve" data-id="${c.id}" ${after > before ? 'disabled' : ''}>承認して下書きに反映</button></div>` : `<p class="hint" style="margin:0">承認はシステム管理者が行います（仮の権限設定）</p>`;
+    }
+    if (c.status === 'pending' && staffMode) acts = `<div class="acts"><button class="btn sm ghost" data-act="ch-withdraw" data-id="${c.id}">取り下げる</button></div>`;
+    return `<li class="req-item"><div class="top">${badge(c.status)}<b>${staffMode ? '' : esc(s.name) + '　'}${fmtD(c.d)}</b><span class="diff">${nm(c.from)} → ${nm(c.to)}</span></div><div>「${esc(c.reason)}」</div>
+      <div class="meta">対象 第${c.ver}版　申請 ${esc(c.at)}${c.by ? `　判断 ${esc(c.by)} ${esc(c.decidedAt || '')}` : ''}${c.note ? `　理由：${esc(c.note)}` : ''}</div>${imp}${acts}</li>`;
+  };
+  return `<div class="cols">${form}<section class="card neu"><h2>${staffMode ? '自分の変更申請' : '変更申請一覧'}</h2>${list.length ? `<ul class="req-list" style="margin-top:12px">${list.map(item).join('')}</ul>` : '<div class="empty" style="margin-top:12px">変更申請はありません。</div>'}</section></div>`;
+}
+
+/* ---------- 職員 ---------- */
+function pageStaff() {
+  const ro = !can('master');
+  const rows = db.staff.map(s => {
+    const st = staffStats(db.asg[s.id] || []);
+    return `<tr class="${s.active ? '' : 'off-row'}"><td><div class="nm-in">${jobDot(s)}<div><b>${esc(s.name)}</b><small class="muted">${esc(s.email)}</small></div></div></td><td>${s.job}</td><td>${s.emp}</td>
+      <td class="tn">${s.contract === 'week' ? `週${hm(s.weekMin)}` : `月${hm(s.monthMin)}`}</td><td class="tn">${s.nMin} / ${s.nWish} / ${s.nMax}</td><td class="num tn">${s.offCap}日</td>
+      <td class="tn">${s.active ? `${hrs(st.min)}・夜${st.n}` : '—'}</td><td>${s.active ? '<span class="badge b-approved">在籍</span>' : '<span class="badge b-muted">利用停止</span>'}</td>
+      <td>${ro ? '' : `<button class="btn sm ghost" data-act="staff-edit" data-id="${s.id}">編集</button>`}</td></tr>`;
+  }).join('');
+  const pairs = db.pairs.map(p => `<tr><td>${esc(SID(p.a) ? SID(p.a).name : '')}</td><td>${esc(SID(p.b) ? SID(p.b).name : '')}</td><td><span class="badge ${p.type === '禁止' ? 'b-forbid' : 'b-avoid'}">${p.type}</span></td><td>${esc(p.note)}</td><td>${ro ? '' : `<button class="btn sm ghost" data-act="pair-del" data-id="${p.id}">削除</button>`}</td></tr>`).join('');
+  return `<div class="wrap" style="padding-block:22px 28px"><div class="titlebar"><div><h1>職員</h1><p class="sub">${active().length}名在籍<span class="proto">試作・サンプルデータ</span></p></div>
+    <div class="actions">${ro ? '' : '<button class="btn primary" data-act="staff-new">職員を追加</button>'}</div></div>
+    ${ro ? '<div class="banner"><b>閲覧のみ</b>職員情報の変更はシステム管理者が行います（仮の権限設定）。</div>' : ''}
+    <section class="card neu"><h2>職員一覧<small>契約・夜勤回数・希望休上限は自動作成と警告に使います</small></h2>
+      <div class="dt-wrap" style="margin-top:10px"><table class="dt"><thead><tr><th>氏名</th><th>職種</th><th>雇用</th><th>契約時間</th><th>夜勤 最低/希望/上限</th><th class="num">希望休上限</th><th>今月の計画</th><th>状態</th><th><span class="muted">操作</span></th></tr></thead><tbody>${rows}</tbody></table></div></section>
+    <section class="card neu"><h2>相性条件<small>一般職員には表示しません</small></h2><p class="lead">「禁止」は同じ日の同じ勤務に配置しません（重大違反）。「回避」はできるだけ避け、避けられないときは参考として表示します。</p>
+      <div class="dt-wrap"><table class="dt"><thead><tr><th>職員A</th><th>職員B</th><th>区分</th><th>メモ（管理用）</th><th></th></tr></thead><tbody>${pairs || '<tr><td colspan="5" class="muted">登録はありません。</td></tr>'}</tbody></table></div>
+      ${ro ? '' : `<form data-form="pair" class="form-row" style="margin-top:14px">
+        <label class="f"><span>職員A</span><select id="pr-a">${active().map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></label>
+        <label class="f"><span>職員B</span><select id="pr-b">${active().map((s, i) => `<option value="${s.id}" ${i === 1 ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>
+        <label class="f"><span>区分</span><select id="pr-type"><option>禁止</option><option>回避</option></select></label>
+        <label class="f" style="flex-grow:2"><span>メモ</span><input type="text" id="pr-note"></label>
+        <button class="btn primary sm" type="submit">追加</button><span class="err" id="pr-err" role="alert" style="flex-basis:100%"></span></form>`}</section></div>`;
+}
+function openStaffForm(id) {
+  const s = id ? SID(id) : { id: '', name: '', job: '看護師', emp: '正職員', contract: 'month', monthMin: 9600, weekMin: 1200, nMin: 0, nWish: 0, nMax: 0, offCap: 8, email: '', active: true };
+  openModal(`<h2 id="modal-title">${id ? '職員を編集' : '職員を追加'}</h2><form data-form="staff" data-id="${id || ''}">
+    <div class="form-grid" style="margin-top:12px">
+      <label class="f"><span>氏名</span><input type="text" id="sf-name" value="${esc(s.name)}" required></label>
+      <label class="f"><span>ログイン用メール</span><input type="email" id="sf-email" value="${esc(s.email)}" required></label>
+      <label class="f"><span>職種</span><select id="sf-job">${JOBS.map(j => `<option ${s.job === j ? 'selected' : ''}>${j}</option>`).join('')}</select></label>
+      <label class="f"><span>雇用区分</span><select id="sf-emp">${['正職員', 'パート'].map(j => `<option ${s.emp === j ? 'selected' : ''}>${j}</option>`).join('')}</select></label>
+      <label class="f"><span>契約時間の方式</span><select id="sf-contract"><option value="month" ${s.contract === 'month' ? 'selected' : ''}>月間固定時間</option><option value="week" ${s.contract === 'week' ? 'selected' : ''}>週契約時間</option></select></label>
+      <label class="f"><span>契約時間（時間）</span><input type="number" id="sf-hours" min="1" max="300" step="0.5" value="${(s.contract === 'week' ? s.weekMin : s.monthMin) / 60}"></label>
+      <label class="f"><span>夜勤 最低（回）</span><input type="number" id="sf-nmin" min="0" max="15" value="${s.nMin}"></label>
+      <label class="f"><span>夜勤 希望（回）</span><input type="number" id="sf-nwish" min="0" max="15" value="${s.nWish}"></label>
+      <label class="f"><span>夜勤 上限（回）</span><input type="number" id="sf-nmax" min="0" max="15" value="${s.nMax}"></label>
+      <label class="f"><span>希望休の上限（日）</span><input type="number" id="sf-offcap" min="0" max="20" value="${s.offCap}"></label>
+      <label class="f"><span>状態</span><select id="sf-active"><option value="1" ${s.active ? 'selected' : ''}>在籍</option><option value="0" ${s.active ? '' : 'selected'}>利用停止（退職・休職）</option></select></label>
+    </div><p class="f"><span class="err" id="sf-err" role="alert"></span></p>
+    <div class="m-foot"><button type="button" class="btn ghost" data-act="close">閉じる</button><button class="btn primary" type="submit">保存</button></div></form>`);
+}
+
+/* ---------- 設定 ---------- */
+function pageConfig() {
+  const ro = !can('master'), dis = ro ? 'disabled' : '';
+  const used = k => db.staff.some(s => (db.asg[s.id] || []).includes(k)) || (db.pubAsg && db.staff.some(s => (db.pubAsg[s.id] || []).includes(k)));
+  const pats = PAT().map(p => `<tr><td>${chip(p.key)}</td><td>${esc(p.short)}</td><td class="tn">${toHM(p.start)}–${p.end > 1440 ? '翌' : ''}${toHM(p.end)}</td><td class="num tn">${p.brk}分</td><td class="num tn">${hm(p.end - p.start - p.brk)}</td><td>${p.end > 1440 ? '夜勤として数える' : ''}</td>
+    <td>${ro ? '' : `<button class="btn sm ghost" data-act="pat-edit" data-k="${p.key}">編集</button> <button class="btn sm ghost" data-act="pat-del" data-k="${p.key}" ${used(p.key) ? 'disabled title="シフトで使用中のため削除できません"' : ''}>削除</button>`}</td></tr>`).join('');
+  const reqRows = PAT().map(p => JOBS.map(j => `<tr><td>${chip(p.key)}</td><td>${j}</td>${['weekday', 'rest'].map(t => `<td class="num"><input class="inl" type="number" min="0" max="20" data-bind="base" data-t="${t}" data-k="${p.key}" data-j="${j}" value="${(db.base[t][p.key] || {})[j] || 0}" aria-label="${esc(p.name)} ${j} ${t === 'weekday' ? '平日' : '土日祝'}" ${dis}></td>`).join('')}</tr>`).join('')).join('');
+  const exRows = db.exceptions.slice().sort((a, b) => a.d - b.d).map(x => `<tr><td class="tn">${fmtD(x.d)}</td><td>${chip(x.k)}</td><td>${x.job}</td><td class="num tn">${x.count}名</td><td>${esc(x.note)}</td><td>${ro ? '' : `<button class="btn sm ghost" data-act="ex-del" data-id="${x.id}">削除</button>`}</td></tr>`).join('');
+  const calRows = db.calendar.slice().sort((a, b) => a.d - b.d).map(c => `<tr><td class="tn">${fmtD(c.d)}</td><td>${c.kind}</td><td>${esc(c.name)}</td><td>${ro ? '' : `<button class="btn sm ghost" data-act="cal-del" data-id="${c.id}">削除</button>`}</td></tr>`).join('');
+  const dayOpts = range([1, DAYS]).map(d => `<option value="${d}">${fmtD(d)}</option>`).join('');
+  const perm = [['アカウント・権限管理', '可', '不可', '不可'], ['職員・勤務・必要人数などの設定', '可', '閲覧のみ（仮）', '不可'], ['自動作成・手動修正・固定・再作成', '可', '可', '不可'], ['希望休・変更申請の承認', '可', '不可（仮）', '不可'], ['確定・公開', '可', '確定前チェックまで（仮）', '不可'], ['自分の希望・申請', '可', '可', '可'], ['公開シフトの閲覧', '可', '可', '可'], ['相性条件の閲覧', '可', '可', '不可']];
+  return `<div class="wrap" style="padding-block:22px 28px"><div class="titlebar"><div><h1>設定</h1><p class="sub">すみれの丘クリニック<span class="proto">試作・サンプルデータ</span></p></div></div>
+  ${ro ? '<div class="banner"><b>閲覧のみ</b>設定の変更はシステム管理者が行います（仮の権限設定）。</div>' : ''}
+  <nav class="toc" aria-label="設定の項目"><a href="#config" data-act="jump" data-to="c-pat">勤務パターン</a><a href="#config" data-act="jump" data-to="c-req">必要人数</a><a href="#config" data-act="jump" data-to="c-ex">日付例外</a><a href="#config" data-act="jump" data-to="c-cal">施設カレンダー</a><a href="#config" data-act="jump" data-to="c-rule">締切・警告・通知</a><a href="#config" data-act="jump" data-to="c-perm">権限</a><a href="#config" data-act="jump" data-to="c-hist">操作履歴</a></nav>
+  <section class="card neu" id="c-pat"><div class="card-h"><div><h2>勤務パターン</h2><p class="lead" style="margin:0">終了が開始より前の時刻なら翌日終了として扱います。日をまたぐ勤務は夜勤回数に数えます。</p></div>${ro ? '' : '<button class="btn sm primary" data-act="pat-new">勤務パターンを追加</button>'}</div>
+    <div class="dt-wrap"><table class="dt"><thead><tr><th>名称</th><th>略称</th><th>時間</th><th class="num">休憩</th><th class="num">勤務時間</th><th></th><th></th></tr></thead><tbody>${pats}</tbody></table></div></section>
+  <section class="card neu" id="c-req"><h2>必要人数<small>勤務 × 職種 × 曜日区分の最低人数</small></h2><p class="lead">土日祝の列は、土曜・日曜と、カレンダーの祝日・休診日に使います。特別営業日は平日の人数を使います。</p>
+    <div class="dt-wrap"><table class="dt"><thead><tr><th>勤務</th><th>職種</th><th class="num">平日</th><th class="num">土日祝・休診日</th></tr></thead><tbody>${reqRows}</tbody></table></div></section>
+  <section class="card neu" id="c-ex"><h2>日付例外<small>特定の日だけ必要人数を変えます</small></h2>
+    <div class="dt-wrap"><table class="dt"><thead><tr><th>日付</th><th>勤務</th><th>職種</th><th class="num">人数</th><th>メモ</th><th></th></tr></thead><tbody>${exRows || '<tr><td colspan="6" class="muted">登録はありません。</td></tr>'}</tbody></table></div>
+    ${ro ? '' : `<form data-form="ex" class="form-row" style="margin-top:14px"><label class="f"><span>日付</span><select id="ex-d">${dayOpts}</select></label><label class="f"><span>勤務</span><select id="ex-k">${PAT().map(p => `<option value="${p.key}">${esc(p.name)}</option>`).join('')}</select></label><label class="f"><span>職種</span><select id="ex-j">${JOBS.map(j => `<option>${j}</option>`).join('')}</select></label><label class="f"><span>人数</span><input type="number" id="ex-n" min="0" max="20" value="2"></label><label class="f" style="flex-grow:2"><span>メモ</span><input type="text" id="ex-note"></label><button class="btn sm primary" type="submit">追加</button></form>`}</section>
+  <section class="card neu" id="c-cal"><h2>施設カレンダー<small>2026年11月</small></h2>
+    <div class="dt-wrap"><table class="dt"><thead><tr><th>日付</th><th>区分</th><th>名称</th><th></th></tr></thead><tbody>${calRows || '<tr><td colspan="4" class="muted">登録はありません。</td></tr>'}</tbody></table></div>
+    ${ro ? '' : `<form data-form="cal" class="form-row" style="margin-top:14px"><label class="f"><span>日付</span><select id="cal-d">${dayOpts}</select></label><label class="f"><span>区分</span><select id="cal-kind"><option>祝日</option><option>休診日</option><option>特別営業日</option></select></label><label class="f" style="flex-grow:2"><span>名称</span><input type="text" id="cal-name" required></label><button class="btn sm primary" type="submit">追加</button></form>`}</section>
+  <section class="card neu" id="c-rule"><h2>締切・警告・通知</h2><fieldset ${dis}><div class="form-grid" style="margin-top:12px">
+    <label class="f"><span>11月分の希望休の締切日</span><input type="date" id="cf-deadline" data-bind="deadline" value="${db.deadline}"></label>
+    <label class="f"><span>勤務間隔の警告基準（時間・仮）</span><input type="number" id="cf-gap" data-bind="gap" min="0" max="24" step="0.5" value="${db.gapMin / 60}"></label>
+    <label class="f"><span>連続勤務の警告基準（日・仮）</span><input type="number" id="cf-run" data-bind="run" min="1" max="14" value="${db.runMax}"></label></div>
+    <p class="hint" style="margin:14px 0 4px">公開時の通知（既定）</p><div class="radios">${[['mail', 'メール'], ['line', 'LINE'], ['app', 'アプリ内のお知らせ']].map(([k, v]) => `<label><input type="checkbox" data-bind="notify" data-k="${k}" ${db.notify[k] ? 'checked' : ''}>${v}</label>`).join('')}</div></fieldset></section>
+  <section class="card neu" id="c-perm"><h2>権限<small>要件定義書 4.1 の案。委任範囲は未決定（U-02）</small></h2><p class="lead">画面上部の「表示する立場」で切り替えて、それぞれの見え方を確認できます。</p>
+    <div class="dt-wrap"><table class="dt"><thead><tr><th>操作</th><th>システム管理者</th><th>シフト作成者</th><th>一般職員</th></tr></thead><tbody>${perm.map(r => `<tr>${r.map((c, i) => i ? `<td>${c}</td>` : `<th scope="row" style="color:var(--fg);font-size:13px">${c}</th>`).join('')}</tr>`).join('')}</tbody></table></div></section>
+  <section class="card neu" id="c-hist"><div class="card-h"><h2>操作履歴<small>新しい順・最大200件</small></h2>${ro ? '' : '<button class="btn sm ghost" data-act="reset">サンプルに戻す</button>'}</div>
+    ${db.history.length ? `<ul class="hist">${db.history.slice(0, 60).map(h => `<li><span class="tn muted">${esc(h.at)}</span><span>${esc(h.who)}</span><span>${esc(h.text)}</span></li>`).join('')}</ul>` : '<div class="empty">まだ操作はありません。</div>'}</section></div>`;
+}
+function openPatForm(k) {
+  const p = k ? pk(k) : { key: '', name: '', short: '', start: 420, end: 960, brk: 60, color: 'e' };
+  openModal(`<h2 id="modal-title">${k ? '勤務パターンを編集' : '勤務パターンを追加'}</h2><form data-form="pattern" data-k="${k || ''}"><div class="form-grid" style="margin-top:12px">
+    <label class="f"><span>名称</span><input type="text" id="pf-name" value="${esc(p.name)}" maxlength="8" required></label>
+    <label class="f"><span>略称（1文字）</span><input type="text" id="pf-short" value="${esc(p.short)}" maxlength="1" required></label>
+    <label class="f"><span>開始</span><input type="time" id="pf-start" value="${toHM(p.start)}" required></label>
+    <label class="f"><span>終了</span><input type="time" id="pf-end" value="${toHM(p.end)}" required></label>
+    <label class="f"><span>休憩（分）</span><input type="number" id="pf-brk" min="0" max="240" value="${p.brk}"></label>
+    <label class="f"><span>色</span><select id="pf-color">${Object.entries(COLORS).map(([c, n]) => `<option value="${c}" ${p.color === c ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+  </div><p class="f"><span class="err" id="pf-err" role="alert"></span></p>
+  ${k ? '<p class="hint">時刻を変えると、この勤務が入っている割当の時間と警告も変わります。</p>' : '<p class="hint">追加した勤務の必要人数は0名で始まります。「必要人数」で設定してください。</p>'}
+  <div class="m-foot"><button type="button" class="btn ghost" data-act="close">閉じる</button><button class="btn primary" type="submit">保存</button></div></form>`);
+}
+
+/* ---------- シフト画面の操作 ---------- */
+function setCell(sid, d, v) { db.asg[sid][d] = v; db.lock[sid + '|' + d] = true; edited(); log(`${SID(sid).name} ${fmtD(d)} を「${isWork(v) ? pk(v).name : v === 'O' ? '休' : '勤務なし'}」に変更（固定）`); recompute(); render(); }
+function pickSel(d, k, j) {
+  if (!k) { for (const kk of order()) for (const jj of JOBS) if (countOn(db.asg, d, kk, jj) < req(d, kk, jj)) return { d, k: kk, j: jj }; return { d, k: order()[0], j: JOBS[0] }; }
+  if (j) return { d, k, j };
+  const short = JOBS.find(x => countOn(db.asg, d, k, x) < req(d, k, x));
+  return { d, k, j: short || JOBS.find(x => req(d, k, x) > 0) || JOBS[0] };
 }
 function defaultSel() {
-  const sh = state.issues.filter(i => i.cat === '配置不足');
-  const inWeek = sh.find(i => weekIdx(i.d) === state.week) || sh[0];
-  return inWeek ? { d: inWeek.d, k: inWeek.k, role: inWeek.r } : null;
+  const sh = ui.issues.filter(i => i.cat === '配置不足');
+  const f = sh.find(i => weekIdx(i.d) === ui.week) || sh[0];
+  return f ? { d: f.d, k: f.k, j: f.j } : null;
 }
 
 let toastT;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3600); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3800); }
 
 let popFor = null;
 function openPop(btn) {
-  const sid = btn.dataset.s, d = +btn.dataset.d, s = byId[sid], v = state.asg[sid][d], locked = !!state.lock[sid + '|' + d];
+  const sid = btn.dataset.s, d = +btn.dataset.d, s = SID(sid), v = db.asg[sid][d], locked = !!db.lock[sid + '|' + d];
   const pop = $('#pop');
-  const optW = k => { const r = blockReason(state.asg, s, d, k, false); return r && v !== k ? `<small class="bad-t">重大違反：${esc(r)}</small>` : ''; };
+  const warn = k => { const r = blockReason(db.asg, s, d, k, false); return r && v !== k ? `<small class="bad-t">重大違反：${esc(r)}</small>` : ''; };
   pop.innerHTML = `<div class="pop-h"><b>${esc(s.name)}</b><span class="muted">${fmtD(d)}</span></div><div class="pop-opts">` +
-    KS.map(k => `<button class="opt ${v === k ? 'cur' : ''}" data-act="set" data-v="${k}"><span class="chip ${SH[k].cls}">${SH[k].name}</span><span><small>${SH[k].time}</small>${optW(k)}</span></button>`).join('') +
+    order().map(k => `<button class="opt ${v === k ? 'cur' : ''}" data-act="set" data-v="${k}">${chip(k)}<span><small>${toHM(pk(k).start)}–${crosses(k) ? '翌' : ''}${toHM(pk(k).end)}</small>${warn(k)}</span></button>`).join('') +
     `<button class="opt ${v === 'O' ? 'cur' : ''}" data-act="set" data-v="O"><span class="chip off">休</span><small>公休</small></button>` +
     `<button class="opt ${v === '' ? 'cur' : ''}" data-act="set" data-v=""><span class="none">—</span><small>勤務なし</small></button></div>` +
     `<div class="pop-f"><button class="btn sm ghost" data-act="poplock">${locked ? '固定を外す' : '固定する'}</button><span class="muted">変更した割当は自動で固定され、再作成でも変わりません。</span></div>`;
@@ -702,55 +1028,53 @@ function openPop(btn) {
   if (r.bottom + ph + 8 > window.innerHeight && r.top - ph - 6 > 0) top = r.top + window.scrollY - ph - 6;
   pop.style.top = top + 'px';
   pop.style.left = Math.max(8, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - pw - 8)) + 'px';
-  popFor = { sid, d, btn };
+  popFor = { sid, d };
   const first = pop.querySelector('.opt.cur') || pop.querySelector('.opt'); first && first.focus();
 }
 function closePop(focusBack) { if ($('#pop').hidden) return; $('#pop').hidden = true; if (focusBack && popFor) { const b = document.querySelector(`.cell[data-s="${popFor.sid}"][data-d="${popFor.d}"]`); b && b.focus(); } popFor = null; }
 
 let lastFocus = null;
-function openModal(html) { lastFocus = document.activeElement; $('#modal-body').innerHTML = html; $('#modal').hidden = false; const f = $('#modal-body').querySelector('textarea, input, button:not([disabled])'); f && f.focus(); }
-function closeModal() { $('#modal').hidden = true; lastFocus && lastFocus.focus && lastFocus.focus(); }
+function openModal(html) { lastFocus = document.activeElement; $('#modal-body').innerHTML = html; $('#modal').hidden = false; const f = $('#modal-body').querySelector('textarea, input, select, button:not([disabled])'); f && f.focus(); }
+function closeModal() { $('#modal').hidden = true; lastFocus && lastFocus.focus && document.contains(lastFocus) && lastFocus.focus(); }
 
 const QUICK = ['他部署へ応援を依頼済み', '派遣職員を手配中', '本人と面談し了承済み', '施設長が状況を確認済み'];
 function openCheck() {
-  const sev = state.issues.filter(i => i.sev === 'severe'), rea = state.issues.filter(i => i.sev === 'reason'), inf = state.issues.filter(i => i.sev === 'info');
-  let h = `<h2 id="modal-title">確定前チェック</h2><p class="muted" style="margin:0">2026年11月・下書きの内容を検証しました。</p>
+  const sev = ui.issues.filter(i => i.sev === 'severe'), rea = ui.issues.filter(i => i.sev === 'reason'), inf = ui.issues.filter(i => i.sev === 'info');
+  let h = `<h2 id="modal-title">確定前チェック</h2><p class="muted" style="margin:0">2026年11月・${statusText()}の内容を検証しました。</p>
     <div class="counts"><span class="c-sev">重大違反 ${sev.length}件</span><span class="c-rea">理由が必要 ${rea.length}件</span><span>参考 ${inf.length}件</span></div>`;
   if (sev.length) h += `<section class="mc sev"><h3>重大違反 ${sev.length}件<small>直すまで確定できません</small></h3><ul>${sev.map(i => `<li><span class="cat">${esc(i.cat)}</span>${esc(i.text)} <button class="link" data-act="goto" data-d="${i.d || 1}">表で見る</button></li>`).join('')}</ul></section>`;
   if (rea.length) h += `<section class="mc"><h3>理由の入力が必要 ${rea.length}件<small>理由を記録すれば確定できます</small></h3>
     <div class="quick"><span class="muted" style="font-size:12px">未入力にまとめて入れる：</span>${QUICK.map(q => `<button data-act="fillall" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-    <ul>${rea.map((i, n) => `<li><label for="rs-${n}"><span class="cat">${esc(i.cat)}</span>${esc(i.text)}</label><textarea id="rs-${n}" rows="2" data-key="${esc(i.key)}" placeholder="理由を入力（必須）">${esc(state.reasons[i.key] || '')}</textarea></li>`).join('')}</ul></section>`;
+    <ul>${rea.map((i, n) => `<li><label for="rs-${n}"><span class="cat">${esc(i.cat)}</span>${esc(i.text)}</label><textarea id="rs-${n}" rows="2" data-key="${esc(i.key)}" placeholder="理由を入力（必須）">${esc(db.reasons[i.key] || '')}</textarea></li>`).join('')}</ul></section>`;
   if (inf.length) h += `<details class="mc"><summary><b>参考 ${inf.length}件</b>（確定に影響しません）</summary><ul>${inf.map(i => `<li><span class="cat">${esc(i.cat)}</span>${esc(i.text)}</li>`).join('')}</ul></details>`;
   if (!sev.length && !rea.length) h += `<section class="mc"><h3>問題はありません</h3><p class="muted" style="margin:0">このまま確定できます。</p></section>`;
-  h += `<div class="m-foot"><span class="muted" id="chk-msg"></span><button class="btn ghost" data-act="close">閉じる</button><button class="btn primary" id="btn-confirm" data-act="confirm">第${state.version + 1}版として確定</button></div>`;
+  h += `<div class="m-foot"><span class="muted" id="chk-msg"></span><button class="btn ghost" data-act="close">閉じる</button><button class="btn primary" id="btn-confirm" data-act="confirm">第${db.version + 1}版として確定</button></div>`;
   openModal(h); updConfirm();
 }
 function updConfirm() {
   const b = $('#btn-confirm'); if (!b) return;
-  const sev = state.issues.filter(i => i.sev === 'severe').length;
-  const miss = state.issues.filter(i => i.sev === 'reason' && !(state.reasons[i.key] || '').trim()).length;
-  b.disabled = !!(sev || miss);
-  $('#chk-msg').textContent = sev ? `重大違反${sev}件を直すと確定できます` : miss ? `理由が未入力の項目が${miss}件あります` : '確定できます';
+  const sev = ui.issues.filter(i => i.sev === 'severe').length;
+  const miss = ui.issues.filter(i => i.sev === 'reason' && !(db.reasons[i.key] || '').trim()).length;
+  b.disabled = !!(sev || miss || !can('decide'));
+  $('#chk-msg').textContent = sev ? `重大違反${sev}件を直すと確定できます` : miss ? `理由が未入力の項目が${miss}件あります` : !can('decide') ? '確定はシステム管理者が行います（仮の権限設定）' : '確定できます';
 }
 function openPublish() {
-  const n = state.notify;
-  openModal(`<h2 id="modal-title">第${state.version}版を公開</h2><p class="muted" style="margin:0">公開すると、全職員がこの版を閲覧できます。通知方法を選んでください。</p>
+  const n = db.notify;
+  openModal(`<h2 id="modal-title">第${db.version}版を公開</h2><p class="muted" style="margin:0">公開すると、全職員がこの版を閲覧できます。通知方法を選んでください。</p>
     <div class="checks"><label><input type="checkbox" id="n-mail" ${n.mail ? 'checked' : ''}> メール</label><label><input type="checkbox" id="n-line" ${n.line ? 'checked' : ''}> LINE</label><label><input type="checkbox" id="n-app" ${n.app ? 'checked' : ''}> アプリ内のお知らせ</label></div>
     <p class="muted" style="font-size:12.5px">この試作では通知は実際には送信されません。</p>
     <div class="m-foot"><button class="btn ghost" data-act="close">閉じる</button><button class="btn primary" data-act="publish">公開する</button></div>`);
 }
-
 function csvEsc(v) { let s = String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
 function buildCsv(kind) {
-  const rows = [];
+  const rows = [], all = range([1, DAYS]);
   if (kind === 'A') {
-    rows.push(['職員ID', '氏名', '職種', '雇用区分', ...range([1, DAYS]).map(fmtD), '勤務時間(分)', '夜勤回数']);
-    STAFF.forEach(s => { const a = state.asg[s.id], st = staffStats(a); rows.push([s.id, s.name, s.role, s.emp, ...range([1, DAYS]).map(d => isWork(a[d]) ? SH[a[d]].name : (OFF[s.id] || []).includes(d) ? '希望休' : a[d] === 'O' ? '休' : ''), st.min, st.n]); });
+    rows.push(['職員ID', '氏名', '職種', '雇用区分', ...all.map(fmtD), '勤務時間(分)', '夜勤回数']);
+    active().forEach(s => { const a = db.asg[s.id], st = staffStats(a), off = offSet(s.id); rows.push([s.id, s.name, s.job, s.emp, ...all.map(d => isWork(a[d]) ? pk(a[d]).name : off.has(d) ? '希望休' : a[d] === 'O' ? '休' : ''), st.min, st.n]); });
   } else {
     rows.push(['職員ID', '氏名', '職種', '勤務日', '勤務コード', '勤務名', '開始日時', '終了日時', '休憩(分)', '勤務(分)']);
-    const t = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-    const dt = (d, m) => { const dd = d + Math.floor(m / 1440); return dd > DAYS ? `2026-12-${String(dd - DAYS).padStart(2, '0')} ${t(m)}` : `2026-11-${String(dd).padStart(2, '0')} ${t(m)}`; };
-    STAFF.forEach(s => { for (let d = 1; d <= DAYS; d++) { const v = state.asg[s.id][d]; if (!isWork(v)) continue; rows.push([s.id, s.name, s.role, `2026-11-${String(d).padStart(2, '0')}`, v, SH[v].name, dt(d, SH[v].start), dt(d, SH[v].end), SH[v].brk, wm(v)]); } });
+    const dt = (d, m) => { const dd = d + Math.floor(m / 1440); return dd > DAYS ? `2026-12-${String(dd - DAYS).padStart(2, '0')} ${toHM(m)}` : `2026-11-${String(dd).padStart(2, '0')} ${toHM(m)}`; };
+    active().forEach(s => { for (let d = 1; d <= DAYS; d++) { const v = db.asg[s.id][d]; if (!isWork(v)) continue; const p = pk(v); rows.push([s.id, s.name, s.job, `2026-11-${String(d).padStart(2, '0')}`, v, p.name, dt(d, p.start), dt(d, p.end), p.brk, wm(v)]); } });
   }
   return rows.map(r => r.map(csvEsc).join(',')).join('\r\n');
 }
@@ -762,78 +1086,205 @@ function openCsv() {
     <textarea id="csv-out" class="csv" readonly>${esc(buildCsv(csvKind))}</textarea>
     <div class="m-foot"><button class="btn ghost" data-act="close">閉じる</button><button class="btn primary" data-act="copycsv">コピー</button></div>`);
 }
+const errOut = (id, msg) => { const e = $(id); if (e) e.textContent = msg; return false; };
 
-function save(quiet) {
-  try { const { issues, ...rest } = state; localStorage.setItem(STORE, JSON.stringify(rest)); if (!quiet) toast('保存しました（このブラウザー内）'); }
-  catch (e) { if (!quiet) toast('保存できませんでした。ブラウザーの保存設定を確認してください。'); }
-}
-function load() {
-  try { const raw = localStorage.getItem(STORE); if (!raw) return null; const s = JSON.parse(raw); return s && s.asg && s.lock ? s : null; } catch (e) { return null; }
-}
-
+/* ---------- イベント ---------- */
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]');
   if (!$('#pop').hidden && !e.target.closest('#pop') && !(t && t.dataset.act === 'cell')) closePop(false);
   if (!t) { if (e.target.id === 'modal') closeModal(); return; }
   const a = t.dataset.act, d = +t.dataset.d;
+  const rerender = () => { recompute(); render(); };
   switch (a) {
-    case 'nav': toast('この試作では「シフト」画面だけが動きます。'); break;
-    case 'view': state.view = t.dataset.v; renderAll(); break;
-    case 'prev': if (state.week > 0) { state.week--; renderAll(); } break;
-    case 'next': if (state.week < WEEKS.length - 1) { state.week++; renderAll(); } break;
-    case 'sel': state.sel = pickSel(d, t.dataset.k, t.dataset.r); if (state.view === 'week' && weekIdx(d) !== state.week) state.week = weekIdx(d); renderAll(); if (window.innerWidth < 1150 && t.closest('#grid')) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' }); break;
-    case 'more': state.showAll = !state.showAll; renderSide(); break;
+    case 'view': ui.view = t.dataset.v; render(); break;
+    case 'prev': if (ui.week > 0) { ui.week--; render(); } break;
+    case 'next': if (ui.week < WEEKS.length - 1) { ui.week++; render(); } break;
+    case 'sel': ui.sel = pickSel(d, t.dataset.k, t.dataset.j); if (ui.view === 'week') ui.week = weekIdx(d); render(); if (window.innerWidth < 1150 && t.closest('#grid')) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' }); break;
+    case 'more': ui.showAll = !ui.showAll; render(); break;
     case 'cell': if (popFor && popFor.sid === t.dataset.s && popFor.d === d) closePop(false); else openPop(t); break;
-    case 'set': { const { sid, d: pd } = popFor; closePop(true); setCell(sid, pd, t.dataset.v); break; }
-    case 'poplock': { const { sid, d: pd } = popFor; const k = sid + '|' + pd; if (state.lock[k]) delete state.lock[k]; else state.lock[k] = true; closePop(true); renderAll(); break; }
-    case 'assign': setCell(t.dataset.s, d, t.dataset.k); toast(`${byId[t.dataset.s].name}さんを${fmtD(d)} ${SH[t.dataset.k].name}に配置し、固定しました。`); break;
-    case 'remove': { const s = byId[t.dataset.s]; setCell(s.id, d, s.weekMax ? '' : 'O'); break; }
-    case 'lock': { const k = t.dataset.s + '|' + d; if (state.lock[k]) delete state.lock[k]; else state.lock[k] = true; renderAll(); break; }
+    case 'set': { const { sid, d: pd } = popFor; closePop(false); setCell(sid, pd, t.dataset.v); const b = document.querySelector(`.cell[data-s="${sid}"][data-d="${pd}"]`); b && b.focus(); break; }
+    case 'poplock': { const { sid, d: pd } = popFor; const k = sid + '|' + pd; if (db.lock[k]) delete db.lock[k]; else db.lock[k] = true; closePop(false); rerender(); break; }
+    case 'assign': setCell(t.dataset.s, d, t.dataset.k); toast(`${SID(t.dataset.s).name}さんを${fmtD(d)} ${pk(t.dataset.k).name}に配置し、固定しました。`); break;
+    case 'remove': { const s = SID(t.dataset.s); setCell(s.id, d, s.contract === 'week' ? '' : 'O'); break; }
+    case 'lock': { const k = t.dataset.s + '|' + d; if (db.lock[k]) delete db.lock[k]; else db.lock[k] = true; rerender(); break; }
     case 'regen': {
-      const n = Object.keys(state.lock).length;
-      state.seed++; state.asg = generate(state.seed); edited(); recompute();
-      const sh = state.issues.filter(i => i.cat === '配置不足').length;
-      if (state.sel && !state.issues.some(i => i.cat === '配置不足' && i.d === state.sel.d)) state.sel = defaultSel() || state.sel;
-      renderAll();
-      toast(`固定${n}件を保持して再作成しました。配置不足は${sh}件です。`); break;
+      const n = Object.keys(db.lock).length;
+      db.seed++; db.asg = generate(db.seed); edited(); log(`固定${n}件を保持して再作成`); recompute();
+      if (ui.sel && !ui.issues.some(i => i.cat === '配置不足' && i.d === ui.sel.d)) ui.sel = defaultSel() || ui.sel;
+      render(); toast(`固定${n}件を保持して再作成しました。配置不足は${ui.issues.filter(i => i.cat === '配置不足').length}件です。`); break;
     }
     case 'csv': openCsv(); break;
     case 'csvkind': csvKind = t.dataset.v; openCsv(); break;
-    case 'copycsv': { const ta = $('#csv-out'); const txt = ta.value; navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(txt).then(() => toast('CSVをコピーしました。'), () => { ta.select(); toast('コピーできなかったため全体を選択しました。手動でコピーしてください。'); }) : (ta.select(), toast('全体を選択しました。手動でコピーしてください。')); break; }
-    case 'save': save(false); break;
-    case 'reset': openModal(`<h2 id="modal-title">サンプルに戻しますか？</h2><p class="muted">手動で直した配置、固定、入力した理由がすべて消え、最初のサンプルに戻ります。</p><div class="m-foot"><button class="btn ghost" data-act="close">やめる</button><button class="btn primary" data-act="doreset">サンプルに戻す</button></div>`); break;
-    case 'doreset': state = initialState(); state.asg = generate(state.seed); state.issues = validate(state.asg); state.sel = defaultSel(); closeModal(); save(true); renderAll(); toast('サンプルに戻しました。'); break;
-    case 'main': if (state.status === 'draft') openCheck(); else if (state.status === 'confirmed') openPublish(); break;
-    case 'fillall': state.issues.filter(i => i.sev === 'reason').forEach(i => { if (!(state.reasons[i.key] || '').trim()) state.reasons[i.key] = t.dataset.q; }); document.querySelectorAll('#modal-body textarea[data-key]').forEach(ta => { ta.value = state.reasons[ta.dataset.key] || ''; }); updConfirm(); renderFooter(); break;
-    case 'confirm': state.version++; state.status = 'confirmed'; closeModal(); save(true); renderAll(); toast(`第${state.version}版として確定しました。次は公開します。`); break;
+    case 'copycsv': { const ta = $('#csv-out'), txt = ta.value; const fb = () => { ta.select(); toast('コピーできなかったため全体を選択しました。手動でコピーしてください。'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast('CSVをコピーしました。'), fb); else fb(); break; }
+    case 'main': if (db.status === 'draft') openCheck(); else if (db.status === 'confirmed') openPublish(); break;
+    case 'fillall': ui.issues.filter(i => i.sev === 'reason').forEach(i => { if (!(db.reasons[i.key] || '').trim()) db.reasons[i.key] = t.dataset.q; }); $$('#modal-body textarea[data-key]').forEach(ta => { ta.value = db.reasons[ta.dataset.key] || ''; }); updConfirm(); save(); break;
+    case 'confirm': db.version++; db.status = 'confirmed'; log(`第${db.version}版として確定（理由付き警告${ui.issues.filter(i => i.sev === 'reason').length}件）`); closeModal(); rerender(); toast(`第${db.version}版として確定しました。次は公開します。`); break;
     case 'publish': {
-      state.notify = { mail: $('#n-mail').checked, line: $('#n-line').checked, app: $('#n-app').checked };
-      const ways = [state.notify.mail && 'メール', state.notify.line && 'LINE', state.notify.app && 'アプリ内'].filter(Boolean);
-      state.status = 'published'; state.published = state.version; closeModal(); save(true); renderAll();
-      toast(`第${state.published}版を公開しました。通知：${ways.length ? ways.join('・') : 'なし'}（試作のため送信はしていません）`); break;
+      db.notify = { mail: $('#n-mail').checked, line: $('#n-line').checked, app: $('#n-app').checked };
+      const ways = [db.notify.mail && 'メール', db.notify.line && 'LINE', db.notify.app && 'アプリ内'].filter(Boolean);
+      db.status = 'published'; db.published = db.version; db.pubAsg = JSON.parse(JSON.stringify(db.asg));
+      log(`第${db.published}版を公開（通知：${ways.join('・') || 'なし'}）`); closeModal(); rerender();
+      toast(`第${db.published}版を公開しました。通知：${ways.length ? ways.join('・') : 'なし'}（試作のため送信はしていません）`); break;
     }
-    case 'goto': state.view = 'week'; state.week = weekIdx(d); closeModal(); renderAll(); $('#grid').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
+    case 'goto': ui.view = 'week'; ui.week = weekIdx(d); closeModal(); render(); $('#grid').scrollIntoView({ behavior: 'smooth', block: 'center' }); break;
     case 'close': closeModal(); break;
+    case 'reset': openModal(`<h2 id="modal-title">サンプルに戻しますか？</h2><p class="muted">シフト、申請、職員、設定、操作履歴がすべて最初のサンプルに戻ります。</p><div class="m-foot"><button class="btn ghost" data-act="close">やめる</button><button class="btn primary" data-act="doreset">サンプルに戻す</button></div>`); break;
+    case 'doreset': resetAll(); closeModal(); render(); toast('サンプルに戻しました。'); break;
+    // 申請
+    case 'reqtab': ui.reqTab = t.dataset.v; render(); break;
+    case 'pick': { const i = ui.picked.indexOf(d); if (i >= 0) ui.picked.splice(i, 1); else ui.picked.push(d); ui.picked.sort((x, y) => x - y); render(); const b = document.querySelector(`.cday[data-d="${d}"]`); b && b.focus(); break; }
+    case 'pick-clear': ui.picked = []; render(); break;
+    case 'approve': case 'reject': {
+      const r = db.requests.find(x => x.id === t.dataset.id), note = ($('#note-' + r.id) || {}).value || '';
+      if (a === 'reject' && !note.trim()) { toast('却下するときは理由を入力してください。'); $('#note-' + r.id).focus(); break; }
+      r.status = a === 'approve' ? 'approved' : 'rejected'; r.by = ROLE_NAMES[ui.role]; r.decidedAt = nowStr(); r.note = note.trim();
+      if (a === 'approve' && r.type === 'off' && isWork(db.asg[r.sid][r.d])) toast(`承認しました。${fmtD(r.d)}に勤務が入っているため重大違反になります。シフト画面で直してください。`);
+      else toast(a === 'approve' ? '承認しました。' : '却下しました。');
+      if (a === 'approve' && r.type === 'off') edited();
+      log(`${SID(r.sid).name} ${fmtD(r.d)} の${REQ_TYPES[r.type]}を${a === 'approve' ? '承認' : '却下'}`); rerender(); break;
+    }
+    case 'withdraw': { const r = db.requests.find(x => x.id === t.dataset.id); const wasOff = r.type === 'off' && r.status === 'approved'; r.status = 'withdrawn'; if (wasOff) edited(); log(`${SID(r.sid).name} ${fmtD(r.d)} の${REQ_TYPES[r.type]}を取下げ`); rerender(); toast('取り下げました。'); break; }
+    case 'go-change': ui.reqTab = 'change'; break;
+    case 'ch-approve': case 'ch-reject': {
+      const c = db.changes.find(x => x.id === t.dataset.id), note = ($('#cn-' + c.id) || {}).value || '';
+      if (a === 'ch-reject' && !note.trim()) { toast('却下するときは理由を入力してください。'); $('#cn-' + c.id).focus(); break; }
+      c.status = a === 'ch-approve' ? 'approved' : 'rejected'; c.by = ROLE_NAMES[ui.role]; c.decidedAt = nowStr(); c.note = note.trim();
+      if (a === 'ch-approve') { db.asg[c.sid][c.d] = c.to; db.lock[c.sid + '|' + c.d] = true; edited(); }
+      log(`${SID(c.sid).name} ${fmtD(c.d)} の変更申請を${a === 'ch-approve' ? '承認し下書きに反映' : '却下'}`); rerender();
+      toast(a === 'ch-approve' ? '承認して下書きに反映しました。シフト画面で確定・公開すると職員に届きます。' : '却下しました。'); break;
+    }
+    case 'ch-withdraw': { const c = db.changes.find(x => x.id === t.dataset.id); c.status = 'withdrawn'; log(`${SID(c.sid).name} ${fmtD(c.d)} の変更申請を取下げ`); rerender(); break; }
+    // 職員
+    case 'staff-new': openStaffForm(null); break;
+    case 'staff-edit': openStaffForm(t.dataset.id); break;
+    case 'pair-del': { const p = db.pairs.find(x => x.id === t.dataset.id); db.pairs = db.pairs.filter(x => x !== p); edited(); log(`相性条件（${SID(p.a).name}・${SID(p.b).name}）を削除`); rerender(); break; }
+    // 設定
+    case 'jump': e.preventDefault(); { const el = document.getElementById(t.dataset.to); el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } break;
+    case 'pat-new': openPatForm(null); break;
+    case 'pat-edit': openPatForm(t.dataset.k); break;
+    case 'pat-del': { const p = pk(t.dataset.k); db.patterns = db.patterns.filter(x => x !== p); ['weekday', 'rest'].forEach(x => delete db.base[x][p.key]); db.exceptions = db.exceptions.filter(x => x.k !== p.key); if (ui.sel && ui.sel.k === p.key) ui.sel = null; edited(); log(`勤務パターン「${p.name}」を削除`); rerender(); break; }
+    case 'ex-del': { const x = db.exceptions.find(y => y.id === t.dataset.id); db.exceptions = db.exceptions.filter(y => y !== x); edited(); log(`日付例外（${fmtD(x.d)}）を削除`); rerender(); break; }
+    case 'cal-del': { const x = db.calendar.find(y => y.id === t.dataset.id); db.calendar = db.calendar.filter(y => y !== x); edited(); log(`カレンダー（${fmtD(x.d)} ${x.name}）を削除`); rerender(); break; }
   }
 });
 document.addEventListener('input', e => {
   const ta = e.target.closest('textarea[data-key]');
-  if (ta) { state.reasons[ta.dataset.key] = ta.value; updConfirm(); renderFooter(); }
+  if (ta) { db.reasons[ta.dataset.key] = ta.value; updConfirm(); save(); }
+});
+document.addEventListener('change', e => {
+  const el = e.target, b = el.dataset.bind; if (!b) return;
+  if (b === 'reqStaff') { ui.reqStaff = el.value; render(); $('#rq-staff') && $('#rq-staff').focus(); return; }
+  if (b === 'reqType') { ui.reqType = el.value; render(); const r = document.querySelector(`input[name="rq-type"][value="${el.value}"]`); r && r.focus(); return; }
+  if (b === 'reqFilter') { ui.reqFilter = el.value; render(); $('#rq-filter') && $('#rq-filter').focus(); return; }
+  if (b === 'base') { const v = Math.max(0, Math.min(20, parseInt(el.value, 10) || 0)); el.value = v; db.base[el.dataset.t][el.dataset.k] = db.base[el.dataset.t][el.dataset.k] || {}; db.base[el.dataset.t][el.dataset.k][el.dataset.j] = v; edited(); log(`必要人数（${pk(el.dataset.k).name}・${el.dataset.j}・${el.dataset.t === 'weekday' ? '平日' : '土日祝'}）を${v}名に変更`); recompute(); return; }
+  if (b === 'deadline') { if (el.value) { db.deadline = el.value; log(`希望休の締切を${el.value}に変更`); save(); } return; }
+  if (b === 'gap') { db.gapMin = Math.round((parseFloat(el.value) || 0) * 60); edited(); log(`勤務間隔の基準を${hm(db.gapMin)}に変更`); recompute(); return; }
+  if (b === 'run') { db.runMax = Math.max(1, parseInt(el.value, 10) || 5); edited(); log(`連続勤務の基準を${db.runMax}日に変更`); recompute(); return; }
+  if (b === 'notify') { db.notify[el.dataset.k] = el.checked; save(); return; }
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, kind = f.dataset.form;
+  if (kind === 'request') {
+    const sid = ui.role === 'staff' ? ui.me : ui.reqStaff, s = SID(sid), t = ui.reqType;
+    if (!ui.picked.length) return errOut('#rq-err', 'カレンダーで日付を1つ以上選んでください。');
+    if (ui.role === 'staff' && deadlineInfo().passed) return errOut('#rq-err', '締切を過ぎています。');
+    const comment = $('#rq-comment').value.trim();
+    if (t === 'off') {
+      const used = db.requests.filter(r => r.sid === sid && r.type === 'off' && (r.status === 'pending' || r.status === 'approved')).length;
+      const dup = ui.picked.filter(d => db.requests.some(r => r.sid === sid && r.d === d && r.type === 'off' && (r.status === 'pending' || r.status === 'approved')));
+      if (dup.length) return errOut('#rq-err', `${dup.map(fmtD).join('、')} はすでに申請済みです。`);
+      if (used + ui.picked.length > s.offCap) return errOut('#rq-err', `希望休の上限（${s.offCap}日）を超えます。あと${Math.max(0, s.offCap - used)}日まで申請できます。`);
+    }
+    let from, to;
+    if (t === 'avail') { from = $('#rq-from').value; to = $('#rq-to').value; if (!from || !to || from === to) return errOut('#rq-err', '開始と終了の時刻を入れてください。'); }
+    const k = t === 'wish' ? $('#rq-k').value : undefined;
+    ui.picked.forEach(d => {
+      if (t !== 'off') db.requests.filter(r => r.sid === sid && r.d === d && r.type === t && r.status === 'approved').forEach(r => { r.status = 'withdrawn'; });
+      db.requests.push({ id: nid('r'), sid, d, type: t, k, from, to, comment, status: t === 'off' ? 'pending' : 'approved', at: nowStr() });
+    });
+    log(`${s.name} の${REQ_TYPES[t]}を${ui.picked.length}日分${t === 'off' ? '申請' : '登録'}`);
+    toast(t === 'off' ? `${ui.picked.length}日分の希望休を申請しました。管理者の承認を待ちます。` : `${ui.picked.length}日分の${REQ_TYPES[t]}を登録しました。`);
+    if (t !== 'off') edited();
+    ui.picked = []; recompute(); render(); return;
+  }
+  if (kind === 'change') {
+    const d = +$('#ch-d').value, to = $('#ch-to').value, reason = $('#ch-reason').value.trim();
+    const from = (db.pubAsg[ui.me] || [])[d];
+    if ((isWork(from) ? from : 'O') === to) return errOut('#ch-err', '現在と同じ内容です。変更後の勤務を選んでください。');
+    if (!reason) return errOut('#ch-err', '理由を入力してください。');
+    if (db.changes.some(c => c.sid === ui.me && c.d === d && c.status === 'pending')) return errOut('#ch-err', 'この日はすでに申請中です。');
+    db.changes.push({ id: nid('c'), sid: ui.me, d, from: isWork(from) ? from : 'O', to, reason, status: 'pending', at: nowStr(), ver: db.published });
+    log(`${SID(ui.me).name} ${fmtD(d)} の変更を申請`); save(); render(); toast('変更を申請しました。管理者の承認を待ちます。'); return;
+  }
+  if (kind === 'staff') {
+    const id = f.dataset.id, name = $('#sf-name').value.trim(), email = $('#sf-email').value.trim();
+    const nmin = +$('#sf-nmin').value, nwish = +$('#sf-nwish').value, nmax = +$('#sf-nmax').value, hours = parseFloat($('#sf-hours').value);
+    if (!name) return errOut('#sf-err', '氏名を入力してください。');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return errOut('#sf-err', 'メールアドレスの形式を確認してください。');
+    if (db.staff.some(s => s.email === email && s.id !== id)) return errOut('#sf-err', 'このメールアドレスは別の職員が使っています。');
+    if (!(nmin <= nwish && nwish <= nmax)) return errOut('#sf-err', '夜勤回数は「最低 ≦ 希望 ≦ 上限」になるようにしてください。');
+    if (!(hours > 0)) return errOut('#sf-err', '契約時間を入力してください。');
+    const contract = $('#sf-contract').value;
+    const data = { name, email, job: $('#sf-job').value, emp: $('#sf-emp').value, contract, nMin: nmin, nWish: nwish, nMax: nmax, offCap: +$('#sf-offcap').value, active: $('#sf-active').value === '1' };
+    if (contract === 'week') data.weekMin = Math.round(hours * 60); else data.monthMin = Math.round(hours * 60);
+    if (id) Object.assign(SID(id), data); else db.staff.push({ id: nid('s'), monthMin: 9600, weekMin: 1200, ...data });
+    ensureAsg(); edited(); log(`職員「${name}」を${id ? '更新' : '追加'}`); closeModal(); recompute(); render(); toast(id ? '保存しました。' : '職員を追加しました。シフト画面の再作成で勤務が入ります。'); return;
+  }
+  if (kind === 'pair') {
+    const A = $('#pr-a').value, B = $('#pr-b').value;
+    if (A === B) return errOut('#pr-err', '別々の職員を選んでください。');
+    if (db.pairs.some(p => (p.a === A && p.b === B) || (p.a === B && p.b === A))) return errOut('#pr-err', 'この組み合わせはすでに登録されています。');
+    db.pairs.push({ id: nid('p'), a: A, b: B, type: $('#pr-type').value, note: $('#pr-note').value.trim() });
+    edited(); log(`相性条件（${SID(A).name}・${SID(B).name}：${$('#pr-type').value}）を追加`); recompute(); render(); toast('相性条件を追加しました。'); return;
+  }
+  if (kind === 'pattern') {
+    const k = f.dataset.k, name = $('#pf-name').value.trim(), short = $('#pf-short').value.trim();
+    const start = parseHM($('#pf-start').value); let end = parseHM($('#pf-end').value); if (end <= start) end += 1440;
+    const brk = parseInt($('#pf-brk').value, 10) || 0;
+    if (!name || !short) return errOut('#pf-err', '名称と略称を入力してください。');
+    if (db.patterns.some(p => p.short === short && p.key !== k)) return errOut('#pf-err', 'この略称はほかの勤務で使っています。');
+    if (brk >= end - start) return errOut('#pf-err', '休憩が勤務時間より長くなっています。');
+    const data = { name, short, start, end, brk, color: $('#pf-color').value };
+    if (k) Object.assign(pk(k), data); else { const key = nid('P'); db.patterns.push({ key, ...data }); ['weekday', 'rest'].forEach(x => { db.base[x][key] = { 看護師: 0, 介護士: 0 }; }); }
+    edited(); log(`勤務パターン「${name}」を${k ? '更新' : '追加'}`); closeModal(); recompute(); render(); toast('保存しました。'); return;
+  }
+  if (kind === 'ex') {
+    const d = +$('#ex-d').value, k = $('#ex-k').value, j = $('#ex-j').value;
+    db.exceptions = db.exceptions.filter(x => !(x.d === d && x.k === k && x.job === j));
+    db.exceptions.push({ id: nid('x'), d, k, job: j, count: Math.max(0, parseInt($('#ex-n').value, 10) || 0), note: $('#ex-note').value.trim() });
+    edited(); log(`日付例外（${fmtD(d)} ${pk(k).name}・${j}）を登録`); recompute(); render(); toast('日付例外を登録しました。'); return;
+  }
+  if (kind === 'cal') {
+    const d = +$('#cal-d').value, name = $('#cal-name').value.trim(); if (!name) return;
+    db.calendar = db.calendar.filter(c => c.d !== d);
+    db.calendar.push({ id: nid('c'), d, kind: $('#cal-kind').value, name });
+    edited(); log(`カレンダーに${fmtD(d)} ${name}を登録`); recompute(); render(); toast('カレンダーに登録しました。'); return;
+  }
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!$('#pop').hidden) closePop(true); else if (!$('#modal').hidden) closeModal();
 });
 window.addEventListener('resize', () => closePop(false));
+$('#role-sel').addEventListener('change', e => {
+  ui.role = e.target.value; ui.picked = [];
+  if (!allowedRoutes().includes(ui.route)) { location.hash = 'shift'; }
+  if (ui.role === 'staff' && ui.reqTab === 'change' && !db.pubAsg) ui.reqTab = 'wish';
+  render(); toast(`「${e.target.selectedOptions[0].textContent}」の立場で表示しています。`);
+});
+function route() {
+  const h = location.hash.slice(1);
+  ui.route = allowedRoutes().includes(h) ? h : 'shift';
+  closeModal(); $('#modal').hidden = true; render(); window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
 
 /* ---------- 起動 ---------- */
-state = initialState();
 const saved = load();
-if (saved) Object.assign(state, saved, { sel: null });
-else state.asg = generate(state.seed);
-state.issues = validate(state.asg);
-state.sel = defaultSel();
-renderAll();
+if (saved) { db = saved; recompute(); ui.sel = defaultSel(); }
+else resetAll();
+route();
 })();
 </script>
 
